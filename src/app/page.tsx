@@ -7,7 +7,12 @@ export default async function Home({searchParams,}: {
 
   console.log(category)
 
-  const res = await fetch(`http://localhost:3000/api/news?category=` + encodeURIComponent(category? category : ''), {cache: 'no-store'});
+  const params = new URLSearchParams();
+  if(category){
+    params.append("category", category)
+  }
+
+  const res = await fetch(`http://localhost:3000/api/news?${params.toString()}`, {cache: 'no-store'});
   const articles = await res.json();
 
 

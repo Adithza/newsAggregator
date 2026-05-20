@@ -1,14 +1,36 @@
 export const CATEGORY_MAP = {
   sports: {
     guardian: "sport",
-    newsapi: "sports",
+    newsData: "sports",
   },
   business: {
     guardian: "business",
-    newsapi: "business",
+    newsData: "business",
   },
   technology: {
     guardian: "technology",
-    newsapi: "technology",
+    newsData: "technology",
   },
+  science: {
+    guardian: "science",
+    newsData: "science",
+  },
+  health: {
+    guardian: "society",
+    newsData: "health",
+  },
+  entertainment: {
+    guardian: "culture",
+    newsData: "entertainment",
+  },
+  politics: {
+    guardian: "politics",
+    newsData: "politics",
+  },
+  world: {
+    guardian: "world",
+    newsData: "world",
+  },
+
+  
 } as const;

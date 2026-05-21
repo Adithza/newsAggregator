@@ -4,8 +4,6 @@ import React from 'react'
 
 function NewsCard({article}: {article: any}) {
 
-    console.log(article.thumbnail, article.title)
-
   return (
     <div key={article.id} className="border p-4 mb-4 rounded flex">
         <div className=''>

@@ -1,10 +1,14 @@
 import { normalizeNewsDataioArticle } from "./normalize";
 
-export async function fetchNewsDataHeadlines(category?: string) {
+export async function fetchNewsDataHeadlines(category?: string, page?: string) {
     const params = new URLSearchParams();
 
     if(category){
         params.append("category", category)
+    }
+
+    if(page){
+        params.append("page", page)
     }
     
     params.append("language", "en");
@@ -14,7 +18,10 @@ export async function fetchNewsDataHeadlines(category?: string) {
 
     const normalized = await data.results.map(normalizeNewsDataioArticle)
 
-    return normalized;
+    return {
+        articles: normalized,
+        nextPage: data.nextPage
+    };
 }
 
 export async function searchNewsDataio(query?: string, category?: string) {
@@ -36,5 +43,8 @@ export async function searchNewsDataio(query?: string, category?: string) {
 
     const normalized = await data.results.map(normalizeNewsDataioArticle)
 
-    return normalized;
+    return {
+        articles: normalized,
+        nextPage: data.nextPage
+    };
 }

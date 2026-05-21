@@ -32,7 +32,7 @@ export default async function Home({searchParams,}: {
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <h1>Home Page</h1>
-      <NewsFeed articles={articles} />
+      <NewsFeed articles={articles} nextPage={data.nextPage} />
     </div>
   );
 }

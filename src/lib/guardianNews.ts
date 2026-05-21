@@ -1,17 +1,18 @@
 import { normalize } from "path";
 import { normalizeGuardianArticle } from "./normalize";
 
-export async function fetchGuardianHeadlines(category?: string, page? : number) {
+export async function fetchGuardianHeadlines(category?: string, page: string = "1") {
 
     const params = new URLSearchParams();
 
     if(category){
         params.append("section", category)
     }
-    
+
     if(page){
-        params.append("page", page.toString())
+        params.append("page", page)
     }
+    
 
     params.append("show-fields", "all");
     params.append("show-blocks", "body")
@@ -24,10 +25,13 @@ export async function fetchGuardianHeadlines(category?: string, page? : number) 
 
     const normalized = await data.response.results.map(normalizeGuardianArticle);
 
-    return normalized;
+    return {
+        articles: normalized,
+        nextPage: data.response.currentPage + 1
+    };
 }
 
-export async function searchGuardianNews(query?: string, category?: string, page? : number) {
+export async function searchGuardianNews(query?: string, category?: string, page: string = "1") {
     const params = new URLSearchParams();
     if(query){
         params.append("q", query)
@@ -37,13 +41,12 @@ export async function searchGuardianNews(query?: string, category?: string, page
         params.append("section", category)
     }
 
-    if(page){
-        params.append("page", page.toString())
-    }
-
     params.append("show-fields", "all");
     params.append("show-blocks", "body")
 
+    if(page){
+        params.append("page", page)
+    }
 
     const res = await fetch(
         'https://content.guardianapis.com/search?'+ params.toString()+'&api-key=' + process.env.GUARDIANAPI_KEY,
@@ -53,5 +56,8 @@ export async function searchGuardianNews(query?: string, category?: string, page
 
     const normalized = await data.response.results.map(normalizeGuardianArticle);
     
-    return normalized;
+    return {
+        articles: normalized,
+        nextPage: data.response.currentPage + 1
+    };
 }

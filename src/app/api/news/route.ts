@@ -3,6 +3,7 @@ import { fetchGuardianHeadlines} from "@/lib/guardianNews";
 import { fetchNewsDataHeadlines } from "@/lib/newsDataio";
 import { aggregateArticles } from "@/lib/aggregate";
 import { CATEGORY_MAP } from "@/lib/category_map";
+import { decodeCursor, encodeCursor } from "@/lib/cursorEncoder";
 
 export async function GET(request: NextRequest) {
     try{
@@ -12,12 +13,26 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
 
         const category = searchParams.get("category") || undefined;
-        const pagePara = searchParams.get("page") || undefined;
-        const page = pagePara ? parseInt(pagePara) : undefined;
+       
+        const page = searchParams.get("page") || undefined;
+
+        let guardianPage: number | undefined;
+        let newsCursor: string | undefined;
+
+        if(page){
+            const decoded = decodeCursor(page);
+
+            if(decoded && typeof decoded === "object"){
+                const guardianPage = (decoded as any).guardianPage;
+                const newsCursor = (decoded as any).newsCursor;
+            }
+        }
 
         if(category && !(category in CATEGORY_MAP)){
             return NextResponse.json({success: false, error: "Invalid category"}, {status: 400});
         }
+
+        
 
         const guardianCat = category ? CATEGORY_MAP[category as Category].guardian : undefined;
         const newsDataioCat = category ? CATEGORY_MAP[category as Category].newsData : undefined;
@@ -25,13 +40,22 @@ export async function GET(request: NextRequest) {
 
         const [GuardianArticles, NewsDataioArticles] =
         await Promise.all([
-            fetchGuardianHeadlines(guardianCat, page),
-            fetchNewsDataHeadlines(newsDataioCat),
+            fetchGuardianHeadlines(guardianCat, page? guardianPage?.toString() : undefined),
+            fetchNewsDataHeadlines(newsDataioCat, page? newsCursor : undefined),
         ]);
 
-        const aggregatedArticles = aggregateArticles(GuardianArticles, NewsDataioArticles);
+        const aggregatedArticles = aggregateArticles(GuardianArticles.articles, NewsDataioArticles.articles);
 
-        return NextResponse.json({success: true, articles: aggregatedArticles});
+        const nextPageGuardian = GuardianArticles.nextPage;
+        const nextPageNewsDataio = NewsDataioArticles.nextPage;
+
+        const nextState = {
+            guardianPage: nextPageGuardian,
+            newsCursor: nextPageNewsDataio
+        };
+
+
+        return NextResponse.json({success: true, articles: aggregatedArticles,  nextPage: encodeCursor(nextState)});
 
     }catch(error){
         return NextResponse.json({success: false, error: (error as Error).message}, {status: 500});

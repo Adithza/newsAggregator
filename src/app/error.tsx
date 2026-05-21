@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Error({
   error,
   reset,
@@ -8,21 +10,28 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black px-4 text-center">
-      <h2 className="text-2xl font-bold text-red-500">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white gap-4">
+      <h1 className="text-2xl font-bold text-red-500">
         Something went wrong
-      </h2>
+      </h1>
 
-      <p className="text-gray-600 dark:text-gray-400 mt-2">
-        {error.message}
-      </p>
+      <p>{error.message}</p>
 
-      <button
-        onClick={() => reset()}
-        className="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg"
-      >
-        Retry
-      </button>
+      <div className="flex gap-4">
+        <button
+          onClick={() => reset()}
+          className="px-4 py-2 bg-blue-600 rounded"
+        >
+          Retry
+        </button>
+
+        <a
+            href="/"
+            className="px-4 py-2 bg-gray-700 text-white rounded"
+        >
+        Home
+        </a>
+      </div>
     </div>
   );
 }

@@ -10,8 +10,6 @@ async function SearchPage({searchParams,}: {
   const res = await fetch(`http://localhost:3000/api/search?query=` + encodeURIComponent(query? query : ''), {cache: 'no-store'});
   const articles = await res.json();
 
-  console.log(articles)
-
 
   return (
     <div>

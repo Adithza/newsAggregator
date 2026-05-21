@@ -1,18 +1,16 @@
 import CatTabs from "@/components/CatTabs";
-import NewsCard from "@/components/NewsCard";
 import NewsFeed from "@/components/NewsFeed";
-import Image from "next/image";
 
-export default async function Home({searchParams,}: {
+export default async function Home({
+  searchParams,
+}: {
   searchParams: Promise<{ category?: string }>;
-}) { //check later
+}) {
   const { category } = await searchParams;
 
-  console.log(category)
-
   const params = new URLSearchParams();
-  if(category){
-    params.append("category", category)
+  if (category) {
+    params.append("category", category);
   }
 
   const origin = process.env.VERCEL_URL
@@ -30,7 +28,6 @@ export default async function Home({searchParams,}: {
     throw new Error(data.error || "Failed to fetch articles");
   }
   const articles = data.articles;
-
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">

@@ -53,12 +53,20 @@ export async function GET(request: NextRequest) {
         const guardianCat = category ? CATEGORY_MAP[category as Category].guardian : undefined;
         const newsDataioCat = category ? CATEGORY_MAP[category as Category].newsData : undefined;
         
+        let GuardianArticles = { articles: [], nextPage: undefined };
+        let NewsDataioArticles = { articles: [], nextPage: undefined };
 
-        const [GuardianArticles, NewsDataioArticles] =
-        await Promise.all([
-            fetchGuardianHeadlines(guardianCat, page? guardianPage?.toString() : undefined),
-            fetchNewsDataHeadlines(newsDataioCat, page? newsCursor : undefined),
-        ]);
+        try {
+            GuardianArticles = await fetchGuardianHeadlines(guardianCat, page ? guardianPage?.toString() : undefined);
+        } catch (error) {
+            console.error(error);
+        }
+
+        try {
+            NewsDataioArticles = await fetchNewsDataHeadlines(newsDataioCat, page ? newsCursor : undefined);
+        } catch (error) {
+            console.error(error);
+        }
 
         const aggregatedArticles = aggregateArticles(GuardianArticles.articles, NewsDataioArticles.articles);
 

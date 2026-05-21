@@ -15,7 +15,11 @@ export default async function Home({searchParams,}: {
     params.append("category", category)
   }
 
-  const res = await fetch(`http://localhost:3000/api/news?${params.toString()}`);
+  const origin = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : `http://localhost:${process.env.PORT || 3000}`;
+
+  const res = await fetch(`${origin}/api/news?${params.toString()}`);
   const data = await res.json();
   if (!res.ok) {
     throw new Error(`News API request failed with status ${res.status} ${data.error}`);

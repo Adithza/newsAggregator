@@ -9,7 +9,11 @@ async function SearchPage({searchParams,}: {
 
   console.log(query)
 
-  const res = await fetch(`http://localhost:3000/api/search?query=` + encodeURIComponent(query? query : ''));
+  const origin = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : `http://localhost:${process.env.PORT || 3000}`;
+
+  const res = await fetch(`${origin}/api/search?query=` + encodeURIComponent(query? query : ''));
   const data = await res.json();
   if (!res.ok) {
     throw new Error(`Search API request failed with status ${res.status} ${data.error}`);

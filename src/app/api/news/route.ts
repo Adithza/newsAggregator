@@ -16,17 +16,21 @@ export async function GET(request: NextRequest) {
        
         const page = searchParams.get("page") || undefined;
 
+        console.log(page);
+
         let guardianPage: number | undefined;
         let newsCursor: string | undefined;
 
         if(page){
             const decoded = decodeCursor(page);
 
-            if(decoded && typeof decoded === "object"){
-                const guardianPage = (decoded as any).guardianPage;
-                const newsCursor = (decoded as any).newsCursor;
-            }
+            guardianPage = (decoded as any).guardianPage;
+            newsCursor = (decoded as any).newsCursor;
         }
+
+        console.log("Initial Guardian Page in news:", guardianPage);
+        console.log("Initial NewsDataio Cursor in news:", newsCursor);
+
 
         if(category && !(category in CATEGORY_MAP)){
             return NextResponse.json({success: false, error: "Invalid category"}, {status: 400});
@@ -48,6 +52,9 @@ export async function GET(request: NextRequest) {
 
         const nextPageGuardian = GuardianArticles.nextPage;
         const nextPageNewsDataio = NewsDataioArticles.nextPage;
+
+        console.log("Initial Guardian Page in news:", nextPageGuardian);
+        console.log("Initial NewsDataio Cursor in news:", nextPageNewsDataio);
 
         const nextState = {
             guardianPage: nextPageGuardian,

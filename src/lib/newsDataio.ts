@@ -24,7 +24,7 @@ export async function fetchNewsDataHeadlines(category?: string, page?: string) {
     };
 }
 
-export async function searchNewsDataio(query?: string, category?: string) {
+export async function searchNewsDataio(query?: string, category?: string, page?: string) {
     const params = new URLSearchParams();
 
     if(query){
@@ -33,6 +33,10 @@ export async function searchNewsDataio(query?: string, category?: string) {
 
     if(category){
         params.append("category", category)
+    }
+
+    if(page){
+        params.append("page", page)
     }
 
     params.append("language", "en");

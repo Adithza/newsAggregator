@@ -4,7 +4,7 @@ import NewsCard from './NewsCard'
 
 function NewsFeed({articles, nextPage} : any) {
 
-  const [allArticles, setAllArticles] = React.useState(articles);
+  const allArticles = articles || [];
 
   return (
     <div className='flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black'>

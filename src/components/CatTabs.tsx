@@ -1,19 +1,39 @@
 "use client"
 
 import Link from 'next/link'
-import React from 'react'
+import { useSearchParams } from 'next/navigation'
+import React, { use } from 'react'
+import { CATEGORY_MAP } from '../lib/category_map'
 
 function CatTabs() {
+
+  const searchParams = useSearchParams()
+  const activeCategory = searchParams.get("category")
+
+  const categories = Object.keys(CATEGORY_MAP)
+
   return (
-    <div className='px-5'>
-      <Link href="/?category=business" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Business</Link>
-      <Link href="/?category=technology" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Technology</Link>
-      <Link href="/?category=science" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Science</Link>
-      <Link href="/?category=health" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Health</Link>
-      <Link href="/?category=entertainment" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Entertainment</Link>
-      <Link href="/?category=sports" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Sports</Link>
-      <Link href="/?category=politics" className='ml-4 px-4 py-2 bg-blue-600 rounded'>Politics</Link>
-      <Link href="/?category=world" className='ml-4 px-4 py-2 bg-blue-600 rounded'>World</Link>
+    <div className='px-4'>
+      {categories.map((category) => {
+        const isActive = activeCategory === category;
+
+        return (
+          <Link
+            key={category}
+            href={`/?category=${category}`}
+            className={`
+              ml-4 px-4 py-2 rounded transition-colors
+              ${
+                isActive
+                  ? "bg-white text-black"
+                  : "bg-blue-600 text-white hover:bg-blue-500"
+              }
+            `}
+          >
+            {category.charAt(0).toUpperCase() + category.slice(1)}
+          </Link>
+        );
+      })}
     </div>
   )
 }

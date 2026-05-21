@@ -13,7 +13,7 @@ export default async function Home({searchParams,}: {
     params.append("category", category)
   }
 
-  const res = await fetch(`http://localhost:3000/api/news?${params.toString()}`, {cache: 'no-store'});
+  const res = await fetch(`http://localhost:3000/api/news?${params.toString()}`);
   const articles = await res.json();
 
 
@@ -23,7 +23,7 @@ export default async function Home({searchParams,}: {
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <h1>Home Page</h1>
       {articles.success ? (
-        <div>
+        <div className="w-1/2 justify-center">
           {articles.articles.map((article: any, index: number) => (
             <NewsCard key={index} article={article} />
           ))}

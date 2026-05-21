@@ -9,7 +9,7 @@ export function normalizeGuardianArticle(article: any) {
         publishedAt: article.webPublicationDate,
         content: article.fields.bodyText,
         byline: (article.fields.byline ? article.fields.byline : undefined),
-        thumbnail: (article.fields.thumbnail ? article.fields.thumbnail : undefined)
+        thumbnail: (article.fields.thumbnail ? article.fields.thumbnail : "/image.png")
     }
 }
 
@@ -22,6 +22,6 @@ export function normalizeNewsDataioArticle(article: any) {
         publishedAt: new Date(article.pubDate + " UTC").toISOString(),
         content: article.description,
         byline: (article.creator ? article.creator.join(", ") : undefined),
-        thumbnail: (article.image_url ? article.image_url : undefined)
+        thumbnail: (article.image_url ? article.image_url : "/image.png")
     }
 }

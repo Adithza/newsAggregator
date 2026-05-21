@@ -1,3 +1,4 @@
+import CatTabs from "@/components/CatTabs";
 import NewsCard from "@/components/NewsCard";
 import NewsFeed from "@/components/NewsFeed";
 import Image from "next/image";
@@ -31,7 +32,7 @@ export default async function Home({searchParams,}: {
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <h1>Home Page</h1>
+      <CatTabs />
       <NewsFeed articles={articles} nextPage={data.nextPage} />
     </div>
   );

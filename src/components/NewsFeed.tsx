@@ -73,13 +73,12 @@ function NewsFeed({articles: initialArticles, nextPage: initialNextPage} : any) 
   }, [fetchMoreArticles, hasMore, isLoading])
 
   return (
-    <div className='flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
-        <div className="w-1/2 justify-center">
+    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12'>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {articles.map((article: any, index: number) => (
             <NewsCard key={index} article={article} />
           ))}
           
-          {/* Sentinel element for infinite scroll */}
           <div ref={sentinelRef} className="py-8 text-center">
             {isLoading && <p className="text-gray-500">Loading more articles...</p>}
             {!hasMore && articles.length > 0 && <p className="text-gray-500">No more articles</p>}

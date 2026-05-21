@@ -14,10 +14,11 @@ async function SearchPage({searchParams,}: {
     : `http://localhost:${process.env.PORT || 3000}`;
 
   const res = await fetch(`${origin}/api/search?query=` + encodeURIComponent(query? query : ''));
-  const data = await res.json();
   if (!res.ok) {
-    throw new Error(`Search API request failed with status ${res.status} ${data.error}`);
+    const body = await res.text();
+    throw new Error(`Search API request failed with status ${res.status}: ${body}`);
   }
+  const data = await res.json();
 
   if(!data.success){
     throw new Error(data.error || "Failed to fetch articles");

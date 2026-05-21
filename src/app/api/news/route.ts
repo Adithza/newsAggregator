@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
         const nextPageGuardian = GuardianArticles.nextPage;
         const nextPageNewsDataio = NewsDataioArticles.nextPage;
 
-        console.log("Initial Guardian Page in news:", nextPageGuardian);
-        console.log("Initial NewsDataio Cursor in news:", nextPageNewsDataio);
+        console.log("Final Guardian Page in news:", nextPageGuardian);
+        console.log("Final NewsDataio Cursor in news:", nextPageNewsDataio);
 
         const nextState = {
             guardianPage: nextPageGuardian,

@@ -16,18 +16,25 @@ export async function fetchGuardianHeadlines(category?: string, page: string = "
     params.append("show-fields", "all");
     params.append("show-blocks", "body")
 
-    const res = await fetch(
-        'https://content.guardianapis.com/search?'+ params.toString()+'&api-key=' + process.env.GUARDIANAPI_KEY,
-        {next: { revalidate: 300 }}
-    );
-    const data = await res.json();
+    try {
+        const res = await fetch(
+            'https://content.guardianapis.com/search?'+ params.toString()+'&api-key=' + process.env.GUARDIANAPI_KEY,
+            {next: { revalidate: 300 }}
+        );
+        if (!res.ok) {
+            throw new Error(`Guardian headlines request failed: ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
 
-    const normalized = await data.response.results.map(normalizeGuardianArticle);
+        const normalized = await data.response.results.map(normalizeGuardianArticle);
 
-    return {
-        articles: normalized,
-        nextPage: data.response.currentPage + 1
-    };
+        return {
+            articles: normalized,
+            nextPage: data.response.currentPage + 1
+        };
+    } catch (error) {
+        throw new Error(`Guardian headlines fetch error: ${error instanceof Error ? error.message : String(error)}`);
+    }
 }
 
 export async function searchGuardianNews(query?: string, category?: string, page: string = "1") {
@@ -47,19 +54,23 @@ export async function searchGuardianNews(query?: string, category?: string, page
         params.append("page", page)
     }
 
-    const res = await fetch(
-        'https://content.guardianapis.com/search?'+ params.toString()+'&api-key=' + process.env.GUARDIANAPI_KEY,
-        {next: { revalidate: 300 }}
-    );
-    if (!res.ok) {
-        throw new Error(`Guardian search request failed: ${res.status} ${res.statusText}`);
-    }
-    const data = await res.json();
+    try {
+        const res = await fetch(
+            'https://content.guardianapis.com/search?'+ params.toString()+'&api-key=' + process.env.GUARDIANAPI_KEY,
+            {next: { revalidate: 300 }}
+        );
+        if (!res.ok) {
+            throw new Error(`Guardian search request failed: ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
 
-    const normalized = await data.response.results.map(normalizeGuardianArticle);
-    
-    return {
-        articles: normalized,
-        nextPage: data.response.currentPage + 1
-    };
+        const normalized = await data.response.results.map(normalizeGuardianArticle);
+        
+        return {
+            articles: normalized,
+            nextPage: data.response.currentPage + 1
+        };
+    } catch (error) {
+        throw new Error(`Guardian search fetch error: ${error instanceof Error ? error.message : String(error)}`);
+    }
 }

@@ -17,16 +17,13 @@ export default async function Home({searchParams,}: {
 
   const res = await fetch(`http://localhost:3000/api/news?${params.toString()}`);
   const data = await res.json();
-
-  if(!data.success){
-    return (
-      <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <h1>Home Page</h1>
-        <p>Error fetching articles: {data.error}</p>
-      </div>
-    )
+  if (!res.ok) {
+    throw new Error(`News API request failed with status ${res.status} ${data.error}`);
   }
 
+  if (!data.success) {
+    throw new Error(data.error || "Failed to fetch articles");
+  }
   const articles = data.articles;
 
 

@@ -14,6 +14,9 @@ export async function fetchNewsDataHeadlines(category?: string, page?: string) {
     params.append("language", "en");
 
     const res = await fetch("https://newsdata.io/api/1/latest?apikey=" + process.env.NEWSDATA_API_KEY + "&" + params.toString(), {next: { revalidate: 300 }});
+    if (!res.ok) {
+        throw new Error(`NewsData.io headlines request failed: ${res.status} ${res.statusText}`);
+    }
     const data = await res.json();
 
     const normalized = await data.results.map(normalizeNewsDataioArticle)
@@ -43,6 +46,9 @@ export async function searchNewsDataio(query?: string, category?: string, page?:
     params.append("removeduplicate", "1");
 
     const res = await fetch("https://newsdata.io/api/1/latest?apikey=" + process.env.NEWSDATA_API_KEY + "&" + params.toString(), {next: { revalidate: 300 }});
+    if (!res.ok) {
+        throw new Error(`NewsData.io search request failed: ${res.status} ${res.statusText}`);
+    }
     const data = await res.json();
 
     const normalized = await data.results.map(normalizeNewsDataioArticle)

@@ -1,6 +1,6 @@
 import { normalizeGuardianArticle } from "./normalize";
 
-export async function fetchGuardianHeadlines(category?: string, page: string = "1") {
+export async function fetchGuardianHeadlines(category?: string, page?: string) {
 
     const params = new URLSearchParams();
 
@@ -37,7 +37,7 @@ export async function fetchGuardianHeadlines(category?: string, page: string = "
     }
 }
 
-export async function searchGuardianNews(query?: string, category?: string, page: string = "1") {
+export async function searchGuardianNews(query?: string, category?: string, page?: string) {
     const params = new URLSearchParams();
     if(query){
         params.append("q", query)

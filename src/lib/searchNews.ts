@@ -3,6 +3,7 @@ import { CATEGORY_MAP } from "./category_map";
 import { decodeCursor, encodeCursor } from "./cursorEncoder";
 import { fetchGuardianHeadlines, searchGuardianNews } from "./guardianNews";
 import { fetchNewsDataHeadlines, searchNewsDataio } from "./newsDataio";
+import { normalizeCategories } from "./normalize";
 
 type Category = keyof typeof CATEGORY_MAP;
 
@@ -60,6 +61,15 @@ export async function searchNews(category?: string, page?: string, query?: strin
 
     const aggregatedArticles = aggregateArticles(GuardianArticles.articles, NewsDataioArticles.articles);
 
+    const updatedArticles = aggregatedArticles.map(article => ({
+            ...article,
+            category: Array.isArray(article.category)
+            ? normalizeCategories(article.category)
+            : article.category
+                ? normalizeCategories([article.category])
+                : []
+        }));
+
     const nextPageGuardian = GuardianArticles.nextPage;
     const nextPageNewsDataio = NewsDataioArticles.nextPage;
 
@@ -73,7 +83,7 @@ export async function searchNews(category?: string, page?: string, query?: strin
 
     return {
         success: true,
-        articles: aggregatedArticles,
+        articles: updatedArticles,
         nextPage: encodeCursor(nextState)
     };
 }

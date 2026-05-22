@@ -26,7 +26,7 @@ export async function fetchGuardianHeadlines(category?: string, page?: string) {
         }
         const data = await res.json();
 
-        const normalized = await data.response.results.map(normalizeGuardianArticle);
+        const normalized = data.response.results.map(normalizeGuardianArticle);
 
         return {
             articles: normalized,
@@ -64,7 +64,7 @@ export async function searchGuardianNews(query?: string, category?: string, page
         }
         const data = await res.json();
 
-        const normalized = await data.response.results.map(normalizeGuardianArticle);
+        const normalized = data.response.results.map(normalizeGuardianArticle);
         
         return {
             articles: normalized,

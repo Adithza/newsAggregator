@@ -3,11 +3,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import NewsCard from './NewsCard'
 
-function NewsFeed({articles: initialArticles, nextPage: initialNextPage} : any) {
+function NewsFeed({ articles: initialArticles, nextPage: initialNextPage }: any) {
   const searchParams = useSearchParams()
   const category = searchParams.get('category')
   const query = searchParams.get('query')
-  
+
   const [articles, setArticles] = useState(initialArticles || [])
   const [nextPage, setNextPage] = useState(initialNextPage)
   const [isLoading, setIsLoading] = useState(false)
@@ -111,23 +111,23 @@ function NewsFeed({articles: initialArticles, nextPage: initialNextPage} : any) 
 
   return (
     <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12'>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {articles.map((article: any, index: number) => (
-            <NewsCard key={index} article={article} />
-          ))}
-          
-          <div ref={sentinelRef} className="py-8 text-center">
-            {isLoading && <p className="text-gray-500">Loading more articles...</p>}
-            {isRateLimited && (
-              <p className="text-gray-500">
-                Rate limit reached. Try again later.
-              </p>
-            )}
-            {!hasMore && !isRateLimited && articles.length > 0 && (
-              <p className="text-gray-500">No more articles</p>
-            )}
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {articles.map((article: any) => (
+          <NewsCard key={article.url} article={article} />
+        ))}
+
+        <div ref={sentinelRef} className="py-8 text-center">
+          {isLoading && <p className="text-gray-500">Loading more articles...</p>}
+          {isRateLimited && (
+            <p className="text-gray-500">
+              Rate limit reached. Try again later.
+            </p>
+          )}
+          {!hasMore && !isRateLimited && articles.length > 0 && (
+            <p className="text-gray-500">No more articles</p>
+          )}
         </div>
+      </div>
     </div>
   )
 }

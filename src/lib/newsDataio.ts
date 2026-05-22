@@ -20,7 +20,7 @@ export async function fetchNewsDataHeadlines(category?: string, page?: string) {
         }
         const data = await res.json();
 
-        const normalized = await data.results.map(normalizeNewsDataioArticle)
+        const normalized = data.results.map(normalizeNewsDataioArticle)
 
         return {
             articles: normalized,
@@ -56,7 +56,7 @@ export async function searchNewsDataio(query?: string, category?: string, page?:
         }
         const data = await res.json();
 
-        const normalized = await data.results.map(normalizeNewsDataioArticle)
+        const normalized = data.results.map(normalizeNewsDataioArticle)
 
         return {
             articles: normalized,

@@ -1,6 +1,9 @@
+import { CATEGORY_MAP } from "./category_map";
+import { API_TO_CATEGORY_MAP } from "./reverseCatMap";
+
+type Category = keyof typeof CATEGORY_MAP
+
 export function normalizeGuardianArticle(article: any) {
-
-
     return {
         title: article.webTitle,
         url: article.webUrl,
@@ -24,4 +27,10 @@ export function normalizeNewsDataioArticle(article: any) {
         byline: (article.creator ? article.creator.join(", ") : undefined),
         thumbnail: (article.image_url ? article.image_url : "/image.png")
     }
+}
+
+export function normalizeCategories(input: string[] = []): string[] {
+  return input
+    .map(c => API_TO_CATEGORY_MAP[c.toLowerCase()])
+    .filter((c): c is Category => Boolean(c));
 }

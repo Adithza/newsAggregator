@@ -153,6 +153,20 @@ Performs a keyword search across all news providers.
 
 ---
 
+### 3. Pagination (Using `nextPage` Cursor)
+
+Both `/api/news` and `/api/search` support **cursor-based pagination** using the `nextPage` token returned in the response.
+
+The `nextPage` value is an encoded cursor that represents the next state of pagination for both external APIs (Guardian + NewsData.io).
+
+#### How to use it
+
+To fetch the next set of results, pass the `nextPage` value back into the same API using the `page` query parameter:
+
+```bash
+GET /api/news?page=<nextPage>
+```
+
 ## Caching Strategy & Rate Limiting
 
 ### Next.js Fetch Caching

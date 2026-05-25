@@ -7,16 +7,16 @@ import Loading from "./loading";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; country?: string }>;
 }) {
-  const { category } = await searchParams;
+  const { category, country } = await searchParams;
 
-   const data = await getNews(category);
+  const data = await getNews(category, undefined, country);
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <CatTabs />
-      <Suspense key={category || "all"} fallback={<Loading />}>
+      <Suspense key={`${category ?? "all"}-${country ?? "all"}`} fallback={<Loading />}>
         <NewsFeed articles={data.articles} nextPage={data.nextPage} />
       </Suspense>
     </div>

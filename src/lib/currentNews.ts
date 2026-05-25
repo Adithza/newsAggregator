@@ -1,6 +1,6 @@
 import { normalizeCurrentNewsArticle } from "./normalize";
 
-export async function fetchCurrentNewsHeadlines(category?: string, page?: string) {
+export async function fetchCurrentNewsHeadlines(category?: string, page?: string, country?: string) {
     const params = new URLSearchParams();
 
     if(category){
@@ -9,6 +9,10 @@ export async function fetchCurrentNewsHeadlines(category?: string, page?: string
 
     if(page){
         params.append("page_number", page)
+    }
+
+    if(country){
+        params.append("country", country)
     }
     
     params.append("language", "en");
@@ -21,6 +25,9 @@ export async function fetchCurrentNewsHeadlines(category?: string, page?: string
         }
         const data = await res.json();
 
+        console.log(country)
+        console.log(data)
+
         const normalized = data.news.map(normalizeCurrentNewsArticle)
 
         return {
@@ -32,7 +39,7 @@ export async function fetchCurrentNewsHeadlines(category?: string, page?: string
     }
 }
 
-export async function searchCurrentNews(query?: string, category?: string, page?: string) {
+export async function searchCurrentNews(query?: string, category?: string, page?: string, country?: string) {
     const params = new URLSearchParams();
 
     if(query){
@@ -45,6 +52,10 @@ export async function searchCurrentNews(query?: string, category?: string, page?
 
      if(page){
         params.append("page_number", page)
+    }
+
+    if(country){
+        params.append("country", country)
     }
     
     params.append("language", "en");

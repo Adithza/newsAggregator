@@ -1,18 +1,22 @@
 "use client"
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Search } from "lucide-react";
 
 function SearchBar() {
   const [searchTerm, setSearchTerm] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   return (
     <div className='items-center'>
       <form onSubmit={(e) => {
         e.preventDefault();
-        router.push(`/searchPage?query=${encodeURIComponent(searchTerm)}`);
+        const params = new URLSearchParams({ query: searchTerm })
+        const country = searchParams.get("country")
+        if (country) params.set("country", country)
+        router.push(`/searchPage?${params.toString()}`);
         console.log('Searching for:', searchTerm);
       }}>
         <Search className='absolute ml-3 mt-3 text-gray-400' size={20} />

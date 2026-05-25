@@ -9,7 +9,7 @@ import { normalizeCategories } from "./normalize";
 type Category = keyof typeof CATEGORY_MAP;
 
 
-export async function getNews(category?: string, page?: string) {
+export async function getNews(category?: string, page?: string, country?: string) {
     let guardianPage: number | undefined;
     let newsCursor: string | undefined;
     let currentNewsCursor : string | undefined;
@@ -58,23 +58,26 @@ export async function getNews(category?: string, page?: string) {
     let NewsDataioArticles = { articles: [], nextPage: undefined };
     let CurrentNewsArticles = {articles: [], nextPage: undefined };
 
+    if(!country){
+        try {
+            GuardianArticles = await fetchGuardianHeadlines(guardianCat, page ? guardianPage?.toString() : undefined);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     try {
-        GuardianArticles = await fetchGuardianHeadlines(guardianCat, page ? guardianPage?.toString() : undefined);
+        NewsDataioArticles = await fetchNewsDataHeadlines(newsDataioCat, page ? newsCursor : undefined, country ? country : undefined);
     } catch (error) {
         console.error(error);
     }
 
     try {
-        NewsDataioArticles = await fetchNewsDataHeadlines(newsDataioCat, page ? newsCursor : undefined);
-    } catch (error) {
-        console.error(error);
-    }
-
-    try {
-        CurrentNewsArticles = await fetchCurrentNewsHeadlines(currentNewsCat, page ? currentNewsCursor : undefined)
+        CurrentNewsArticles = await fetchCurrentNewsHeadlines(currentNewsCat, page ? currentNewsCursor : undefined, country ? country : undefined)
     } catch(error){
         console.error(error)
     }
+
 
     const aggregatedArticles = aggregateArticles(GuardianArticles.articles, NewsDataioArticles.articles, CurrentNewsArticles.articles);
 

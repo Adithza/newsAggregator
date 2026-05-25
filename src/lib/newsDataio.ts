@@ -1,6 +1,6 @@
 import { normalizeNewsDataioArticle } from "./normalize";
 
-export async function fetchNewsDataHeadlines(category?: string, page?: string) {
+export async function fetchNewsDataHeadlines(category?: string, page?: string, country?: string) {
     const params = new URLSearchParams();
 
     if(category){
@@ -9,6 +9,10 @@ export async function fetchNewsDataHeadlines(category?: string, page?: string) {
 
     if(page){
         params.append("page", page)
+    }
+
+    if(country){
+        params.append("country", country)
     }
     
     params.append("language", "en");
@@ -33,7 +37,7 @@ export async function fetchNewsDataHeadlines(category?: string, page?: string) {
     }
 }
 
-export async function searchNewsDataio(query?: string, category?: string, page?: string) {
+export async function searchNewsDataio(query?: string, category?: string, page?: string, country?:string) {
     const params = new URLSearchParams();
 
     if(query){
@@ -46,6 +50,10 @@ export async function searchNewsDataio(query?: string, category?: string, page?:
 
     if(page){
         params.append("page", page)
+    }
+
+    if(country){
+        params.append("country", country)
     }
 
     params.append("language", "en");

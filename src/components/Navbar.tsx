@@ -2,6 +2,7 @@ import React from 'react'
 import SearchBar from './SearchBar'
 import CatTabs from './CatTabs'
 import Link from 'next/link'
+import CountryFilter from './CountryFilter'
 
 function Navbar() {
   return (
@@ -9,6 +10,7 @@ function Navbar() {
       <Link href="/" className=" text-lg md:text-2xl font-bold bg-linear-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent whitespace-nowrap">
         DailyPlanet
       </Link>
+      <CountryFilter />
       <div className='ml-auto'><SearchBar /></div>
     </div>
   )

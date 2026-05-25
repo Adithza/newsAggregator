@@ -9,7 +9,7 @@ import { normalizeCategories } from "./normalize";
 type Category = keyof typeof CATEGORY_MAP;
 
 
-export async function searchNews(category?: string, page?: string, query?: string) {
+export async function searchNews(category?: string, page?: string, query?: string, country?: string) {
     let guardianPage: number | undefined;
     let newsCursor: string | undefined;
     let currentNewsCursor : string | undefined;
@@ -57,23 +57,25 @@ export async function searchNews(category?: string, page?: string, query?: strin
     let NewsDataioArticles = { articles: [], nextPage: undefined };
     let CurrentNewsArticles = {articles: [], nextPage: undefined };
 
-    try {
-        GuardianArticles = await searchGuardianNews(query, guardianCat, page ? guardianPage?.toString() : undefined);
-    } catch (error) {
-        console.error(error);
-    }
-
-    try {
-        NewsDataioArticles = await searchNewsDataio(query, newsDataioCat, page ? newsCursor : undefined);
-    } catch (error) {
-        console.error(error);
-    }
-
-    try {
-            CurrentNewsArticles = await searchCurrentNews(query, currentNewsCat, page ? currentNewsCursor : undefined)
-        } catch(error){
-            console.error(error)
+    if (!country) {
+        try {
+            GuardianArticles = await searchGuardianNews(query, guardianCat, page ? guardianPage?.toString() : undefined);
+        } catch (error) {
+            console.error(error);
         }
+    }
+
+    try {
+        NewsDataioArticles = await searchNewsDataio(query, newsDataioCat, page ? newsCursor : undefined, country);
+    } catch (error) {
+        console.error(error);
+    }
+
+    try {
+        CurrentNewsArticles = await searchCurrentNews(query, currentNewsCat, page ? currentNewsCursor : undefined, country);
+    } catch (error) {
+        console.error(error);
+    }
     
     console.log(CurrentNewsArticles)
 

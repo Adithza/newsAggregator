@@ -23,8 +23,9 @@ export async function GET(request: NextRequest) {
         const category = searchParams.get("category") || undefined;
         const page = searchParams.get("page") || undefined;
         const query = searchParams.get("query") || undefined;
+        const country = searchParams.get("country") || undefined;
 
-        const result = await searchNews(category, page, query);
+        const result = await searchNews(category, page, query, country);
         return NextResponse.json(result);
 
     }catch(error){

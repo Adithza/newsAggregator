@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React, { use } from 'react'
+import React from 'react'
 import { CATEGORY_MAP } from '../lib/category_map'
 
 function CatTabs() {
@@ -17,10 +17,13 @@ function CatTabs() {
       {categories.map((category) => {
         const isActive = activeCategory === category;
 
+        const params = new URLSearchParams(searchParams.toString())
+        params.set("category", category)
+
         return (
           <Link
             key={category}
-            href={`/?category=${category}`}
+            href={`/?${params.toString()}`}
             className={`
               px-2 md:px-4 lg:text-lg py-2 rounded-sm text-sm font-medium whitespace-nowrap transition-all duration-200
               ${

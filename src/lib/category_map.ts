@@ -37,6 +37,6 @@ export const CATEGORY_MAP = {
   world: {
     guardian: "world",
     newsData: "world",
-    currentNews: "world",
+    currentNews: "general",
   },
 } as const;

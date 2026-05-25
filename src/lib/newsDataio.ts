@@ -12,6 +12,8 @@ export async function fetchNewsDataHeadlines(category?: string, page?: string) {
     }
     
     params.append("language", "en");
+    params.append("removeduplicate", "1");
+
 
     try {
         const res = await fetch("https://newsdata.io/api/1/latest?apikey=" + process.env.NEWSDATA_API_KEY + "&" + params.toString(), {next: { revalidate: 300 }});

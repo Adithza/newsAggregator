@@ -12,7 +12,7 @@ export function normalizeGuardianArticle(article: any) {
         publishedAt: article.webPublicationDate,
         content: article.fields.bodyText,
         byline: (article.fields.byline ? article.fields.byline : undefined),
-        thumbnail: (article.fields.thumbnail ? article.fields.thumbnail : "/image.png")
+        thumbnail: (article.fields.thumbnail ? article.fields.thumbnail : "/image.png"),
     }
 }
 
@@ -25,7 +25,20 @@ export function normalizeNewsDataioArticle(article: any) {
         publishedAt: new Date(article.pubDate + " UTC").toISOString(),
         content: article.description,
         byline: (article.creator ? article.creator.join(", ") : undefined),
-        thumbnail: (article.image_url ? article.image_url : "/image.png")
+        thumbnail: (article.image_url ? article.image_url : "/image.png"),
+    }
+}
+
+export function normalizeCurrentNewsArticle(article: any) {
+    return {
+        title: article.title,
+        url: article.url,
+        category: article.category,
+        source : "CurrentNews",
+        publishedAt: new Date(article.published),
+        content: article.description,
+        byline: (article.author ? article.author: undefined),
+        thumbnail: (article.image ? article.image : "/image.png")
     }
 }
 

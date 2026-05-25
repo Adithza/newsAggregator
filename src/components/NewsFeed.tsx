@@ -47,7 +47,15 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage }: any)
       const isLimitError = res.status === 429 || String(errorMessage).toLowerCase().includes('rate limit')
 
       if (res.ok && data.success) {
-        setArticles((prev: any) => [...prev, ...data.articles])
+        setArticles((prev: any) => {
+          const existingUrls = new Set(prev.map((article: any) => article.url));
+
+          const uniqueNewArticles = data.articles.filter(
+        (article: any) => !existingUrls.has(article.url)
+      );
+
+      return [...prev, ...uniqueNewArticles];
+});
         setNextPage(data.nextPage)
         setHasMore(!!data.nextPage)
       } else if (isLimitError) {

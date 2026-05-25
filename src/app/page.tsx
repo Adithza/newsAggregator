@@ -15,7 +15,9 @@ export default async function Home({
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <CatTabs />
+      <Suspense fallback={null}>
+        <CatTabs />
+      </Suspense>
       <Suspense key={`${category ?? "all"}-${country ?? "all"}`} fallback={<Loading />}>
         <NewsFeed articles={data.articles} nextPage={data.nextPage} />
       </Suspense>

@@ -1,4 +1,5 @@
 export const CATEGORY_MAP = {
+  
   sports: {
     guardian: "sport",
     newsData: "sports",

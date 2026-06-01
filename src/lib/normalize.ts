@@ -56,7 +56,7 @@ export function normalizeNewsDataioArticle(article: any, countryFilter?: string)
     return {
         title: article.title,
         url: article.link,
-        category: article.category,
+        category: (article.category ? article.category : "general"),
         source : article.source_name,
         publishedAt: new Date(article.pubDate + " UTC").toISOString(),
         content: article.description,
@@ -70,7 +70,7 @@ export function normalizeCurrentNewsArticle(article: any, countryFilter?: string
     return {
         title: article.title,
         url: article.url,
-        category: article.category,
+        category: (article.category ? article.category : "general"),
         source : "CurrentNews",
         publishedAt: new Date(article.published),
         content: article.description,

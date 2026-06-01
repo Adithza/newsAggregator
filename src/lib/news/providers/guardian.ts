@@ -8,8 +8,8 @@ export const guardianProvider: NewsProvider = {
   supportsCountryFilter: false,
 
   isEnabled() {
-    return Boolean(process.env.GUARDIANAPI_KEY)
-  },
+    return false /*Boolean(process.env.GUARDIANAPI_KEY)
+*/  },
 
   resolveCategory(appCategory: string) {
     return CATEGORY_MAP[appCategory as keyof typeof CATEGORY_MAP]?.guardian

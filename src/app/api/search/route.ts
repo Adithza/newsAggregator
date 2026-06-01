@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchGuardianNews } from "@/lib/guardianNews";
-import { searchNewsDataio } from "@/lib/newsDataio";
-import { aggregateArticles } from "@/lib/aggregate";
-import { CATEGORY_MAP } from "@/lib/category_map";
-import { decodeCursor, encodeCursor } from "@/lib/cursorEncoder";
 import { searchNews } from "@/lib/searchNews";
 import { searchRatelimit } from "@/lib/rateLimit";
 

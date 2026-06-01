@@ -9,9 +9,7 @@ for (const key in CATEGORY_MAP) {
 
   const mapping = CATEGORY_MAP[category];
 
-  // Guardian mapping
   API_TO_CATEGORY_MAP[mapping.guardian] = category;
 
-  // NewsData mapping (can be multiple later if needed)
   API_TO_CATEGORY_MAP[mapping.newsData] = category;
 }

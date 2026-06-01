@@ -17,7 +17,7 @@ function Navbar() {
           </div>
         }
       >
-        <CountryFilter />
+         <CountryFilter />
         <div className='ml-auto'><SearchBar /></div>
       </Suspense>
     </div>

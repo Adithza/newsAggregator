@@ -3,6 +3,41 @@ import { API_TO_CATEGORY_MAP } from "./reverseCatMap";
 
 type Category = keyof typeof CATEGORY_MAP
 
+const PLACEHOLDER_IMAGE = "/image.png";
+
+export function resolveThumbnail(url: unknown): string {
+    if (typeof url !== "string") return PLACEHOLDER_IMAGE;
+
+    const trimmed = url.trim();
+    if (!trimmed || /^none$/i.test(trimmed) || /^null$/i.test(trimmed)) {
+        return PLACEHOLDER_IMAGE;
+    }
+
+    if (trimmed.startsWith("//")) {
+        return `https:${trimmed}`;
+    }
+
+    return trimmed;
+}
+
+export function formatArticleCountry(
+    value: unknown,
+    countryFilter?: string
+): string | undefined {
+    if (Array.isArray(value)) {
+        const joined = value.filter(Boolean).join(", ");
+        if (joined) return joined;
+    } else if (typeof value === "string" && value.trim()) {
+        return value.trim();
+    }
+
+    if (countryFilter?.trim()) {
+        return countryFilter.trim().toUpperCase();
+    }
+
+    return undefined;
+}
+
 export function normalizeGuardianArticle(article: any) {
     return {
         title: article.webTitle,
@@ -10,13 +45,14 @@ export function normalizeGuardianArticle(article: any) {
         category: [article.sectionName],
         source : "Guardian",
         publishedAt: article.webPublicationDate,
-        content: article.fields.bodyText,
-        byline: (article.fields.byline ? article.fields.byline : undefined),
-        thumbnail: (article.fields.thumbnail ? article.fields.thumbnail : "/image.png"),
+        content: article.fields?.bodyText,
+        byline: (article.fields?.byline ? article.fields.byline : undefined),
+        thumbnail: resolveThumbnail(article.fields?.thumbnail),
+        country: "United Kingdom",
     }
 }
 
-export function normalizeNewsDataioArticle(article: any) {
+export function normalizeNewsDataioArticle(article: any, countryFilter?: string) {
     return {
         title: article.title,
         url: article.link,
@@ -25,11 +61,12 @@ export function normalizeNewsDataioArticle(article: any) {
         publishedAt: new Date(article.pubDate + " UTC").toISOString(),
         content: article.description,
         byline: (article.creator ? article.creator.join(", ") : undefined),
-        thumbnail: (article.image_url ? article.image_url : "/image.png"),
+        thumbnail: resolveThumbnail(article.image_url),
+        country: formatArticleCountry(article.country, countryFilter),
     }
 }
 
-export function normalizeCurrentNewsArticle(article: any) {
+export function normalizeCurrentNewsArticle(article: any, countryFilter?: string) {
     return {
         title: article.title,
         url: article.url,
@@ -38,7 +75,8 @@ export function normalizeCurrentNewsArticle(article: any) {
         publishedAt: new Date(article.published),
         content: article.description,
         byline: (article.author ? article.author: undefined),
-        thumbnail: (article.image ? article.image : "/image.png")
+        thumbnail: resolveThumbnail(article.image),
+        country: formatArticleCountry(article.country, countryFilter),
     }
 }
 

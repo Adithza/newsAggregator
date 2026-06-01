@@ -4,6 +4,8 @@ import React from 'react'
 
 function NewsCard({article}: {article: any}) {
 
+  console.log(article)
+
   return (
     <div key={article.id} className="bg-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className='h-48 overflow-hidden bg-gray-200'>
@@ -14,6 +16,7 @@ function NewsCard({article}: {article: any}) {
             <div className='flex gap-2'>
               <p className="text-xs lg:text-sm text-gray-600">{new Date(article.publishedAt).toLocaleString("en-IN")}</p>
               <p className='text-xs lg:text-sm text-gray-300 pl-2'>{article.source}</p>
+              <p className='text-xs lg:text-sm text-gray-300 pl-2'>{article.country? article.country : ""}</p>
             </div>
             <p className='text-xs lg:text-sm line-clamp-2'>{article.content}</p>
             <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">

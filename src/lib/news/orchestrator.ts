@@ -35,7 +35,13 @@ function normalizeArticleCategories(category: unknown): string[] {
 export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> {
   const mode = input.query?.trim() ? "search" : "headlines"
 
-  if (input.category && !(input.category in CATEGORY_MAP)) {
+  const categories = Array.isArray(input.category)
+    ? input.category
+    : input.category
+    ? [input.category]
+    : []
+
+  if (categories.some((category) => !(category in CATEGORY_MAP))) {
     throw new Error("Invalid category")
   }
 

@@ -23,8 +23,14 @@ export const guardianProvider: NewsProvider = {
     }
 
     if (request.category) {
-      const apiCategory = this.resolveCategory(request.category)
-      if (apiCategory) params.append("section", apiCategory)
+      const requestedCategories = Array.isArray(request.category)
+        ? request.category
+        : [request.category]
+
+      requestedCategories.forEach((category) => {
+        const apiCategory = this.resolveCategory(category)
+        if (apiCategory) params.append("section", apiCategory)
+      })
     }
 
     if (request.cursor != null) {

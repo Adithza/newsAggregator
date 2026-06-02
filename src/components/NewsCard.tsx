@@ -4,8 +4,6 @@ import React from 'react'
 
 function NewsCard({article}: {article: any}) {
 
-  console.log(article)
-
   return (
     <div key={article.id} className="bg-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className='h-48 overflow-hidden bg-gray-200'>

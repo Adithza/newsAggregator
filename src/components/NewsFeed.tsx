@@ -2,12 +2,18 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import NewsCard from './NewsCard'
+import { useSearch } from './searchContext'
+import { useRouter } from 'next/navigation'
 
 function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) {
+
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const category = searchParams.get('category')
+  const categories = searchParams.getAll('category')
+  const categoryString = categories.join(',')
   const query = searchParams.get('query')
   const country = searchParams.get('country')
+  const { setSearchTerm, searchTerm } = useSearch()
 
   const [articles, setArticles] = useState(initialArticles || [])
   const [nextPage, setNextPage] = useState(initialNextPage)
@@ -17,6 +23,9 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
   const [retryAt, setRetryAt] = useState<number | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
+  const isLocalSearchActive = !!searchTerm.trim()
+  console.log("Local search active?", isLocalSearchActive, "Search term:", searchTerm)
+
   useEffect(() => {
     setArticles(initialArticles || [])
     setNextPage(initialNextPage)
@@ -24,28 +33,29 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     setIsLoading(false)
     setIsRateLimited(false)
     setRetryAt(null)
-  }, [initialArticles, initialNextPage, category, query, country])
+  }, [initialArticles, initialNextPage, categoryString, query, country])
 
-  const fetchMoreArticles = React.useCallback(async () => {
+  const fetchMoreArticles = React.useCallback(async (options?: { similar?: boolean }) => {
     if (isLoading || !hasMore || !nextPage || isRateLimited) return
+
+    const loadSimilar = options?.similar ?? false
 
     setIsLoading(true)
     try {
       const params = new URLSearchParams()
       params.append('page', nextPage)
-      if (category) {
-        params.append('category', category)
+      if (categories.length > 0) {
+        categories.forEach((category) => params.append('category', category))
       }
-      if (query) {
-        params.append('query', query)
+      const useSearchQuery = query || searchTerm 
+      if (useSearchQuery) {
+        params.append('query', query || searchTerm)
       }
-      if(country){
+      if (country) {
         params.append('country', country)
       }
 
-
-
-      const endpoint = query ? '/api/search' : '/api/news'
+      const endpoint = useSearchQuery ? '/api/search' : '/api/news'
       const res = await fetch(`${endpoint}?${params.toString()}`)
       const data = await res.json()
 
@@ -53,15 +63,21 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
       const isLimitError = res.status === 429 || String(errorMessage).toLowerCase().includes('rate limit')
 
       if (res.ok && data.success) {
+        if (!Array.isArray(data.articles) || data.articles.length === 0) {
+          setHasMore(false)
+          setNextPage(undefined)
+          return
+        }
+
         setArticles((prev: any) => {
           const existingUrls = new Set(prev.map((article: any) => article.url));
 
           const uniqueNewArticles = data.articles.filter(
-        (article: any) => !existingUrls.has(article.url)
-      );
+            (article: any) => !existingUrls.has(article.url)
+          );
 
-      return [...prev, ...uniqueNewArticles];
-});
+          return [...prev, ...uniqueNewArticles];
+        });
         setNextPage(data.nextPage)
         setHasMore(!!data.nextPage)
       } else if (isLimitError) {
@@ -79,12 +95,12 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     } finally {
       setIsLoading(false)
     }
-  }, [category, query, country, hasMore, isLoading, isRateLimited, nextPage])
+  }, [categoryString, query, country, hasMore, isLoading, isRateLimited, nextPage, searchTerm])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasMore && !isLoading && !isRateLimited) {
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading && !isRateLimited && !isLocalSearchActive) {
           observer.disconnect()
           fetchMoreArticles()
         }
@@ -101,7 +117,17 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
         observer.unobserve(sentinelRef.current)
       }
     }
-  }, [fetchMoreArticles, hasMore, isLoading, isRateLimited])
+  }, [fetchMoreArticles, hasMore, isLoading, isRateLimited, isLocalSearchActive])
+
+  const handleLoadSimilar = () => {
+    if (!searchTerm.trim()) return
+
+    const params = new URLSearchParams({ query: searchTerm.trim() })
+    if (country) params.set("country", country)
+
+    router.push(`/searchPage?${params.toString()}`)
+    setSearchTerm("")
+  }
 
   useEffect(() => {
     if (!isRateLimited || retryAt === null) return
@@ -123,24 +149,43 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     return () => window.clearTimeout(timer)
   }, [isRateLimited, nextPage, retryAt])
 
+  const filteredArticles = isLocalSearchActive
+    ? articles.filter((article: any) =>
+        article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.content?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : articles
+
   return (
     <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12'>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        {articles.map((article: any) => (
+        {filteredArticles.map((article: any) => (
           <NewsCard key={article.url} article={article} />
         ))}
 
-        <div ref={sentinelRef} className="py-8 text-center">
-          {isLoading && <p className="text-gray-500">Loading more articles...</p>}
+        <div ref={sentinelRef} className="col-span-full py-8 text-center">
+          {isLocalSearchActive && !isLoading && !isRateLimited && (
+            <button
+              type="button"
+              onClick={handleLoadSimilar}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition-colors"
+            >
+              Load articles related to "{searchTerm}" ?
+            </button>
+          )}
+          {isLoading && (
+            <p className="text-gray-500">Loading more articles...</p>
+          )}
           {isRateLimited && (
             <p className="text-gray-500">
               Rate limit reached. Try again later.
             </p>
           )}
-          {!hasMore && !isRateLimited && articles.length > 0 && (
+          {!isLocalSearchActive && !hasMore && !isRateLimited && articles.length > 0 && (
             <p className="text-gray-500">No more articles</p>
           )}
         </div>
+
       </div>
     </div>
   )

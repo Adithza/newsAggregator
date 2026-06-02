@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
         }
 
         const searchParams = request.nextUrl.searchParams;
-        const category = searchParams.get("category") || undefined;
+        const categories = searchParams.getAll("category")
+        const category = categories.length ? categories : undefined
         const page = searchParams.get("page") || undefined;
         const country = searchParams.get("country") || undefined;
 

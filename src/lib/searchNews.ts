@@ -1,7 +1,7 @@
 import { fetchNews } from "./news/orchestrator";
 
 export async function searchNews(
-    category?: string,
+    category?: string | string[],
     page?: string,
     query?: string,
     country?: string

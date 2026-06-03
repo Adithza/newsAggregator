@@ -24,7 +24,7 @@ function CountryFilter() {
   }
 
   return (
-    <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide py-3 sm:px-12 justify-start md:justify-center w-full bg-gray-950">
+    <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide py-3 sm:px-12 justify-start w-full bg-gray-950">
       {COUNTRIES.map(({ code, label }) => {
         const isActive = active === code
         return (

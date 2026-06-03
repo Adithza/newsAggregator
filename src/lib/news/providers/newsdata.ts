@@ -6,9 +6,10 @@ import type { NewsProvider } from "./types"
 export const newsdataProvider: NewsProvider = {
   id: "newsdata",
   supportsCountryFilter: true,
+  supportsTimeframeFilter: false,
 
   isEnabled() {
-    return Boolean(process.env.NEWSDATA_API_KEY)
+    return Boolean(process.env.NEWSDATA_API_KEY) 
   },
 
   resolveCategory(appCategory: string) {
@@ -41,8 +42,10 @@ export const newsdataProvider: NewsProvider = {
       params.append("country", request.country)
     }
 
+
     params.append("language", "en")
     params.append("removeduplicate", "1")
+
 
     const res = await fetch(
       `https://newsdata.io/api/1/latest?apikey=${process.env.NEWSDATA_API_KEY}&${params.toString()}`,

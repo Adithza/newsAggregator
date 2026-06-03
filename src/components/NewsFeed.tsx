@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import NewsCard from './NewsCard'
 import { useSearch } from './searchContext'
 import { useRouter } from 'next/navigation'
@@ -9,10 +9,11 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const categories = searchParams.getAll('category')
+  const { categories } = useSearch()
   const categoryString = categories.join(',')
   const query = searchParams.get('query')
   const country = searchParams.get('country')
+  const timeframe = searchParams.get('timeframe')
   const { setSearchTerm, searchTerm } = useSearch()
 
   const [articles, setArticles] = useState(initialArticles || [])
@@ -33,7 +34,7 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     setIsLoading(false)
     setIsRateLimited(false)
     setRetryAt(null)
-  }, [initialArticles, initialNextPage, categoryString, query, country])
+  }, [initialArticles, initialNextPage, categoryString, query, country, timeframe])
 
   const fetchMoreArticles = React.useCallback(async (options?: { similar?: boolean }) => {
     if (isLoading || !hasMore || !nextPage || isRateLimited) return
@@ -53,6 +54,9 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
       }
       if (country) {
         params.append('country', country)
+      }
+      if (timeframe) {
+        params.append('timeframe', timeframe)
       }
 
       const endpoint = useSearchQuery ? '/api/search' : '/api/news'
@@ -95,7 +99,7 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     } finally {
       setIsLoading(false)
     }
-  }, [categoryString, query, country, hasMore, isLoading, isRateLimited, nextPage, searchTerm])
+  }, [categoryString, query, country, timeframe, hasMore, isLoading, isRateLimited, nextPage, searchTerm])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -119,14 +123,24 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     }
   }, [fetchMoreArticles, hasMore, isLoading, isRateLimited, isLocalSearchActive])
 
+  const pathname = usePathname()
   const handleLoadSimilar = () => {
     if (!searchTerm.trim()) return
 
     const params = new URLSearchParams({ query: searchTerm.trim() })
     if (country) params.set("country", country)
 
-    router.push(`/searchPage?${params.toString()}`)
-    setSearchTerm("")
+    if(pathname === '/') {
+      params.set("category", searchParams.get("category") ?? "")
+      router.push(`/searchPage?${params.toString()}`)
+      setSearchTerm("")
+    }else{
+      categories.forEach((category) => params.append('category', category))
+      router.push(`/searchPage?${params.toString()}`)
+      setSearchTerm("")
+    }
+
+    
   }
 
   useEffect(() => {

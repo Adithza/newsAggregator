@@ -10,7 +10,7 @@ function Navbar() {
   const isSearchPage = typeof window !== 'undefined' && window.location.pathname === '/searchPage'
 
   return (
-    <div className='bg-gray-950 shadow-md w-screen h-16 py-4 px-8 flex items-center sticky top-0'>
+    <div className="bg-gray-950 shadow-md fixed top-0 left-0 right-0 h-16 py-4 px-8 flex items-center z-50 w-full">
       <Link href="/" className=" text-lg md:text-2xl font-bold bg-linear-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent whitespace-nowrap">
         DailyPlanet
       </Link>

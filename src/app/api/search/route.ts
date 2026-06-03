@@ -20,8 +20,9 @@ export async function GET(request: NextRequest) {
         const page = searchParams.get("page") || undefined;
         const query = searchParams.get("query") || undefined;
         const country = searchParams.get("country") || undefined;
+        const timeframe = searchParams.get("timeframe") || undefined;
 
-        const result = await searchNews(category, page, query, country);
+        const result = await searchNews(category, page, query, country, timeframe);
         return NextResponse.json(result);
 
     }catch(error){

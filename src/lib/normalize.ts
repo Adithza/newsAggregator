@@ -58,7 +58,7 @@ export function normalizeNewsDataioArticle(article: any, countryFilter?: string)
         url: article.link,
         category: (article.category ? article.category : "general"),
         source : article.source_name,
-        publishedAt: new Date(article.pubDate + " UTC").toISOString(),
+        publishedAt: new Date(article.pubDate + " " + article.pubDateTZ).toISOString(),
         content: article.description,
         byline: (article.creator ? article.creator.join(", ") : undefined),
         thumbnail: resolveThumbnail(article.image_url),

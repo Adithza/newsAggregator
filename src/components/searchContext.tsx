@@ -5,6 +5,8 @@ import { createContext, useContext, useState } from "react";
 const SearchContext = createContext<{
   searchTerm: string;
   setSearchTerm: (value: string) => void;
+  categories: string[];
+  setCategories: (value: string[]) => void;
 } | null>(null);
 
 export function SearchProvider({
@@ -13,10 +15,11 @@ export function SearchProvider({
   children: React.ReactNode;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
 
   return (
     <SearchContext.Provider
-      value={{ searchTerm, setSearchTerm }}
+      value={{ searchTerm, setSearchTerm, categories, setCategories }}
     >
       {children}
     </SearchContext.Provider>

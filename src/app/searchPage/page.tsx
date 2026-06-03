@@ -8,28 +8,40 @@ import SearchBar from "@/components/GlobalSearchBar";
 async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ query?: string | string[]; category?: string | string[]; country?: string | string[] }>;
+  searchParams: Promise<{ query?: string | string[]; category?: string | string[]; country?: string | string[]; timeframe?: string | string[] }>;
 }) {
-  const { query, category, country } = await searchParams;
+  const { query, category, country, timeframe } = await searchParams;
   const queryValue = Array.isArray(query) ? query[0] : query
   const countryValue = Array.isArray(country) ? country[0] : country
   const categoryValues = Array.isArray(category) ? category : category ? [category] : undefined
-  const data = await searchNews(categoryValues, undefined, queryValue, countryValue);
-  const hasSearchParams = Boolean(queryValue?.trim() || categoryValues?.length)
+  const timeframeValue = Array.isArray(timeframe) ? timeframe[0] : timeframe
+  const data = await searchNews(categoryValues, undefined, queryValue, countryValue, timeframeValue);
+  const hasSearchParams = Boolean(queryValue?.trim() || categoryValues?.length || timeframeValue)
 
+  if (!hasSearchParams) {
   return (
-    <div className='flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
-      <Suspense key={`${queryValue ?? ""}-${countryValue ?? "all"}-${categoryValues?.join(",") ?? "all"}`} fallback={<Loading/>}>
-        {hasSearchParams ? (
-          <NewsFeed articles={data.articles} nextPage={data.nextPage} />
-        ) : (
-          <div className="h-100">
-            <SearchBar />
-          </div>
-        )}
-      </Suspense>
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+      <SearchBar />
     </div>
   );
+}
+
+return (
+  <div className="flex flex-1 bg-zinc-50 dark:bg-black">
+    <div className="flex-1">
+      <Suspense
+        key={`${queryValue ?? ""}-${countryValue ?? "all"}-${categoryValues?.join(",") ?? "all"}`}
+        fallback={<Loading />}
+      >
+        <NewsFeed articles={data.articles} nextPage={data.nextPage} />
+      </Suspense>
+    </div>
+
+    <div className="shrink-0  pr-10  z-50">
+      <SearchBar />
+    </div>
+  </div>
+);
 }
 
 export default SearchPage;

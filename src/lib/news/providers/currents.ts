@@ -2,10 +2,12 @@ import { CATEGORY_MAP } from "@/lib/category_map"
 import { normalizeCurrentNewsArticle } from "@/lib/normalize"
 import type { FetchRequest, ProviderResult } from "../types"
 import type { NewsProvider } from "./types"
+import { time } from "console"
 
 export const currentsProvider: NewsProvider = {
   id: "currents",
   supportsCountryFilter: true,
+  supportsTimeframeFilter: true,
 
   isEnabled() {
     return Boolean(process.env.CURRENTNEWS_API_KEY)
@@ -31,6 +33,11 @@ export const currentsProvider: NewsProvider = {
         const apiCategory = this.resolveCategory(category)
         if (apiCategory) params.append("category", apiCategory)
       })
+    }
+
+    if(request.mode === "search" && request.timeframe) {
+      params.append("end_date", new Date().toISOString())
+      params.append("start_date", new Date(Date.now() - parseInt(request.timeframe) * 60 * 60 * 1000).toISOString())
     }
 
     if (request.cursor != null) {

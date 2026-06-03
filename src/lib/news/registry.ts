@@ -20,11 +20,14 @@ export function assertProvidersConfigured(): void {
 }
 
 export function getActiveProviders(opts: {
-  country?: string
+  country?: string,
+  timeframe?: string
 }): NewsProvider[] {
   return newsProviders.filter((provider) => {
     if (!provider.isEnabled()) return false
     if (opts.country && !provider.supportsCountryFilter) return false
+    if (opts.timeframe && !provider.supportsTimeframeFilter) return false
+
     return true
   })
 }

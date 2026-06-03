@@ -1,10 +1,13 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useSearch } from "./searchContext";
 import { Filter } from "lucide-react";
 export default function LocalSearch() {
   const { searchTerm, setSearchTerm } = useSearch();
 
+  const pathname = usePathname()
+  if(pathname !== '/searchPage') {
   return (
     <div>
       <a href="/searchPage"><Filter className='absolute ml-3 mt-3 text-gray-400' size={20} /></a>
@@ -17,4 +20,4 @@ export default function LocalSearch() {
     </div>
     
   );
-}
+}}

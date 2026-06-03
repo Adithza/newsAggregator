@@ -6,10 +6,10 @@ import type { NewsProvider } from "./types"
 export const guardianProvider: NewsProvider = {
   id: "guardian",
   supportsCountryFilter: false,
-
+  supportsTimeframeFilter: false,
   isEnabled() {
-    return false /*Boolean(process.env.GUARDIANAPI_KEY)
-*/  },
+    return Boolean(process.env.GUARDIANAPI_KEY)
+  },
 
   resolveCategory(appCategory: string) {
     return CATEGORY_MAP[appCategory as keyof typeof CATEGORY_MAP]?.guardian
@@ -30,6 +30,18 @@ export const guardianProvider: NewsProvider = {
       requestedCategories.forEach((category) => {
         const apiCategory = this.resolveCategory(category)
         if (apiCategory) params.append("section", apiCategory)
+      })
+    }
+
+    if (request.timeframe) {
+      params.append("to-date", new Date().toISOString().split("T")[0])
+      params.append(
+        "from-date",
+        new Date(Date.now() - parseInt(request.timeframe) * 60 * 60 * 1000).toISOString().split("T")[0]
+      )
+      console.log("Timeframe params:", {
+        "from-date": new Date(Date.now() - parseInt(request.timeframe) * 60 * 60 * 1000).toISOString().split("T")[0],
+        "to-date": new Date().toISOString().split("T")[0],
       })
     }
 

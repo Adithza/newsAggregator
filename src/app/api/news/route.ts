@@ -18,8 +18,9 @@ export async function GET(request: NextRequest) {
         const category = categories.length ? categories : undefined
         const page = searchParams.get("page") || undefined;
         const country = searchParams.get("country") || undefined;
+        const timeframe = searchParams.get("timeframe") || undefined;
 
-        const result = await getNews(category, page, country);
+        const result = await getNews(category, page, country, timeframe);
         return NextResponse.json(result);
     } catch (error) {
         const statusCode = (error as Error).message.includes('Invalid') ? 400 : 500;

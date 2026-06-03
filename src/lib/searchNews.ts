@@ -4,7 +4,8 @@ export async function searchNews(
     category?: string | string[],
     page?: string,
     query?: string,
-    country?: string
+    country?: string,
+    timeframe?: string
 ) {
-    return fetchNews({ category, page, query, country });
+    return fetchNews({ category, page, query, country, timeframe });
 }

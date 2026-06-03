@@ -43,4 +43,5 @@ export type FetchNewsInput = {
   page?: string
   query?: string
   country?: string
+  timeframe?: string
 }

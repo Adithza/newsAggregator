@@ -21,12 +21,13 @@ export function assertProvidersConfigured(): void {
 
 export function getActiveProviders(opts: {
   country?: string,
-  timeframe?: string
+  startDate?: string
+  endDate?: string
 }): NewsProvider[] {
   return newsProviders.filter((provider) => {
     if (!provider.isEnabled()) return false
     if (opts.country && !provider.supportsCountryFilter) return false
-    if (opts.timeframe && !provider.supportsTimeframeFilter) return false
+    if (opts.startDate && opts.endDate && !provider.supportsDateFilter) return false
 
     return true
   })

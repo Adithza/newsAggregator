@@ -6,7 +6,7 @@ import type { NewsProvider } from "./types"
 export const newsdataProvider: NewsProvider = {
   id: "newsdata",
   supportsCountryFilter: true,
-  supportsTimeframeFilter: false,
+  supportsDateFilter: false,
 
   isEnabled() {
     return Boolean(process.env.NEWSDATA_API_KEY) 

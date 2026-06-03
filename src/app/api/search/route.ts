@@ -20,9 +20,10 @@ export async function GET(request: NextRequest) {
         const page = searchParams.get("page") || undefined;
         const query = searchParams.get("query") || undefined;
         const country = searchParams.get("country") || undefined;
-        const timeframe = searchParams.get("timeframe") || undefined;
+        const startDate = searchParams.get("startDate") || undefined;
+        const endDate = searchParams.get("endDate") || undefined;
 
-        const result = await searchNews(category, page, query, country, timeframe);
+        const result = await searchNews(category, page, query, country, startDate, endDate);
         return NextResponse.json(result);
 
     }catch(error){

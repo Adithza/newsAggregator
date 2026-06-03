@@ -9,7 +9,8 @@ import { Search } from 'lucide-react';
 function SearchBar() {
   const { searchTerm, setSearchTerm } = useSearch();
   const { categories, setCategories } = useSearch();
-  const [timeframe, setTimeframe] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -32,6 +33,14 @@ function SearchBar() {
     { id: 'World', value: 'world', label: 'World' },
   ]
 
+  const today = new Date();
+
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+  const maxDate = today.toISOString().split("T")[0];
+  const minDate = threeMonthsAgo.toISOString().split("T")[0];
+
   return (
     <div className='items-center sticky top-20 z-50 bg-black rounded-lg w-full max-w-lg'>
       <form onSubmit={(e) => {
@@ -47,10 +56,11 @@ function SearchBar() {
 
         const country = searchParams.get("country")
         if (country) params.set("country", country)
-        if (timeframe) params.set("timeframe", timeframe)
+        if (startDate) params.set("startDate", startDate)
+        if (endDate) params.set("endDate", endDate)
 
         router.push(`/searchPage?${params.toString()}`);
-        console.log('Searching for:', searchTerm, 'categories:', categories, 'timeframe:', timeframe);
+        console.log('Searching for:', searchTerm, 'categories:', categories, 'startDate', startDate, 'endDate', endDate);
       }}>
         <div>
           <Search className='absolute ml-3 mt-3 text-gray-400' size={20} />
@@ -81,18 +91,9 @@ function SearchBar() {
         ))}
 
         <div>
-          <select
-            name='timeframe'
-            value={timeframe}
-            onChange={(e) => setTimeframe(e.target.value)}
-            className='bg-gray-900 text-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
-          >
-            <option value="">Any Time</option>
-            <option value="1">Last Hour</option>
-            <option value="12">Last 12 Hours</option>
-            <option value="24">Last 24 Hours</option>
-            <option value="48">Last 2 days</option>
-          </select>
+          <input type="date" value={startDate} min={minDate} max={endDate || maxDate} onChange={(e) => setStartDate(e.target.value)} className='mt-2 text-sm text-gray-400' />
+          <label className='mx-2 text-sm text-gray-400'>to</label>
+          <input type="date" value={endDate} min={startDate || minDate} max={maxDate} onChange={(e) => setEndDate(e.target.value)} className='mt-2 text-sm text-gray-400' />
         </div>
       </form>
     </div>

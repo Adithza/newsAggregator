@@ -48,7 +48,7 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
   assertProvidersConfigured()
 
   const pagination = decodePagination(input.page)
-  const providers = getActiveProviders({ country: input.country, timeframe: input.timeframe })
+  const providers = getActiveProviders({ country: input.country, startDate: input.startDate, endDate: input.endDate })
   const isPaginated = Boolean(input.page)
 
   const results = await Promise.all(
@@ -58,7 +58,8 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
         query: input.query,
         category: input.category,
         country: input.country,
-        timeframe: input.timeframe,
+        startDate: input.startDate,
+        endDate: input.endDate,
         cursor: isPaginated ? pickCursor(provider.id, pagination) : undefined,
       }
 

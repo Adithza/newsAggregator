@@ -13,7 +13,8 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
   const categoryString = categories.join(',')
   const query = searchParams.get('query')
   const country = searchParams.get('country')
-  const timeframe = searchParams.get('timeframe')
+  const startDate = searchParams.get('startDate')
+  const endDate = searchParams.get('endDate')
   const { setSearchTerm, searchTerm } = useSearch()
 
   const [articles, setArticles] = useState(initialArticles || [])
@@ -34,7 +35,7 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     setIsLoading(false)
     setIsRateLimited(false)
     setRetryAt(null)
-  }, [initialArticles, initialNextPage, categoryString, query, country, timeframe])
+  }, [initialArticles, initialNextPage, categoryString, query, country, startDate, endDate])
 
   const fetchMoreArticles = React.useCallback(async (options?: { similar?: boolean }) => {
     if (isLoading || !hasMore || !nextPage || isRateLimited) return
@@ -55,8 +56,11 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
       if (country) {
         params.append('country', country)
       }
-      if (timeframe) {
-        params.append('timeframe', timeframe)
+      if (startDate) {
+        params.append('startDate', startDate)
+      }
+      if (endDate) {
+        params.append('endDate', endDate)
       }
 
       const endpoint = useSearchQuery ? '/api/search' : '/api/news'
@@ -99,7 +103,7 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     } finally {
       setIsLoading(false)
     }
-  }, [categoryString, query, country, timeframe, hasMore, isLoading, isRateLimited, nextPage, searchTerm])
+  }, [categoryString, query, country, startDate, endDate, hasMore, isLoading, isRateLimited, nextPage, searchTerm])
 
   useEffect(() => {
     const observer = new IntersectionObserver(

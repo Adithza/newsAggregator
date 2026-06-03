@@ -15,7 +15,8 @@ export type FetchMode = "headlines" | "search"
 export type FetchRequest = {
   mode: FetchMode
   query?: string
-  timeframe?: string
+  startDate?: string
+  endDate?: string
   category?: string | string[]
   country?: string
   cursor?: string | number
@@ -43,5 +44,6 @@ export type FetchNewsInput = {
   page?: string
   query?: string
   country?: string
-  timeframe?: string
+  startDate?: string
+  endDate?: string
 }

@@ -8,15 +8,16 @@ import SearchBar from "@/components/GlobalSearchBar";
 async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ query?: string | string[]; category?: string | string[]; country?: string | string[]; timeframe?: string | string[] }>;
+  searchParams: Promise<{ query?: string | string[]; category?: string | string[]; country?: string | string[]; startDate?: string | string[]; endDate?: string | string[] }>;
 }) {
-  const { query, category, country, timeframe } = await searchParams;
+  const { query, category, country, startDate, endDate } = await searchParams;
   const queryValue = Array.isArray(query) ? query[0] : query
   const countryValue = Array.isArray(country) ? country[0] : country
   const categoryValues = Array.isArray(category) ? category : category ? [category] : undefined
-  const timeframeValue = Array.isArray(timeframe) ? timeframe[0] : timeframe
-  const data = await searchNews(categoryValues, undefined, queryValue, countryValue, timeframeValue);
-  const hasSearchParams = Boolean(queryValue?.trim() || categoryValues?.length || timeframeValue)
+  const startDateValue = Array.isArray(startDate) ? startDate[0] : startDate
+  const endDateValue = Array.isArray(endDate) ? endDate[0] : endDate
+  const data = await searchNews(categoryValues, undefined, queryValue, countryValue, startDateValue, endDateValue);
+  const hasSearchParams = Boolean(queryValue?.trim() || categoryValues?.length || startDateValue || endDateValue)
 
   if (!hasSearchParams) {
   return (

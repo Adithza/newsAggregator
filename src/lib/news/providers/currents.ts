@@ -7,7 +7,7 @@ import { time } from "console"
 export const currentsProvider: NewsProvider = {
   id: "currents",
   supportsCountryFilter: true,
-  supportsTimeframeFilter: true,
+  supportsDateFilter: true,
 
   isEnabled() {
     return Boolean(process.env.CURRENTNEWS_API_KEY)
@@ -35,9 +35,13 @@ export const currentsProvider: NewsProvider = {
       })
     }
 
-    if(request.mode === "search" && request.timeframe) {
-      params.append("end_date", new Date().toISOString())
-      params.append("start_date", new Date(Date.now() - parseInt(request.timeframe) * 60 * 60 * 1000).toISOString())
+    console.log(request.mode)
+
+    if (request.startDate && request.endDate) {
+      params.append("start_date", new Date(request.startDate).toISOString())
+      params.append("end_date", new Date(request.endDate).toISOString())
+      console.log(params.toString())
+      request.mode = "search"
     }
 
     if (request.cursor != null) {
@@ -50,6 +54,8 @@ export const currentsProvider: NewsProvider = {
 
     params.append("language", "en")
     params.append("page_size", "10")
+
+    console.log(params.toString())
 
     const endpoint =
       request.mode === "search"

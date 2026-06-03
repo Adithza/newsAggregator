@@ -6,7 +6,7 @@ import type { NewsProvider } from "./types"
 export const guardianProvider: NewsProvider = {
   id: "guardian",
   supportsCountryFilter: false,
-  supportsTimeframeFilter: false,
+  supportsDateFilter: true,
   isEnabled() {
     return Boolean(process.env.GUARDIANAPI_KEY)
   },
@@ -33,15 +33,15 @@ export const guardianProvider: NewsProvider = {
       })
     }
 
-    if (request.timeframe) {
-      params.append("to-date", new Date().toISOString().split("T")[0])
+    if (request.startDate && request.endDate) {
+      params.append("to-date", new Date(request.endDate).toISOString())
       params.append(
         "from-date",
-        new Date(Date.now() - parseInt(request.timeframe) * 60 * 60 * 1000).toISOString().split("T")[0]
+        new Date(request.startDate).toISOString()
       )
-      console.log("Timeframe params:", {
-        "from-date": new Date(Date.now() - parseInt(request.timeframe) * 60 * 60 * 1000).toISOString().split("T")[0],
-        "to-date": new Date().toISOString().split("T")[0],
+      console.log("Date filter params:", {
+        "from-date": new Date(request.startDate).toISOString(),
+        "to-date": new Date(request.endDate).toISOString(),
       })
     }
 

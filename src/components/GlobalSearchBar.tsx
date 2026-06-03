@@ -14,6 +14,20 @@ function SearchBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+const FIFTEEN_DAYS = 15;
+
+const addDays = (dateStr: string, days: number) => {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split("T")[0];
+};
+
+const subtractDays = (dateStr: string, days: number) => {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split("T")[0];
+};
+
   const toggleCategory = (value: string) => {
     if (categories.includes(value)) {
       setCategories(categories.filter((category: string) => category !== value))
@@ -91,10 +105,39 @@ function SearchBar() {
         ))}
 
         <div>
-          <input type="date" value={startDate} min={minDate} max={endDate || maxDate} onChange={(e) => setStartDate(e.target.value)} className='mt-2 text-sm text-gray-400' />
-          <label className='mx-2 text-sm text-gray-400'>to</label>
-          <input type="date" value={endDate} min={startDate || minDate} max={maxDate} onChange={(e) => setEndDate(e.target.value)} className='mt-2 text-sm text-gray-400' />
+        <input
+          type="date"
+          value={startDate}
+          min={minDate}
+          max={
+            endDate
+              ? subtractDays(endDate, -FIFTEEN_DAYS) > maxDate
+                ? maxDate
+                  : addDays(endDate, 0)
+                    : maxDate
+          }
+          onChange={(e) => setStartDate(e.target.value)}
+          className="mt-2 text-sm text-gray-400"
+          />
+
+          <label className="mx-2 text-sm text-gray-400">to</label>
+
+          <input
+            type="date"
+            value={endDate}
+            min={startDate || minDate}
+            max={
+              startDate
+                ? addDays(startDate, FIFTEEN_DAYS) < maxDate
+                  ? addDays(startDate, FIFTEEN_DAYS)
+                  : maxDate
+                : maxDate
+          }
+          onChange={(e) => setEndDate(e.target.value)}
+          className="mt-2 text-sm text-gray-400"
+        />
         </div>
+        <label className="mt-2 text-sm text-gray-400">* Dates must be within the last 3 months and 15 days of each other</label>
       </form>
     </div>
   )

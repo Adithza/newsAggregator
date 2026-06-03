@@ -44,6 +44,8 @@ export const currentsProvider: NewsProvider = {
       request.mode = "search"
     }
 
+    console.log(request.mode)
+
     if (request.cursor != null) {
       params.append("page_number", String(request.cursor))
     }
@@ -61,6 +63,8 @@ export const currentsProvider: NewsProvider = {
       request.mode === "search"
         ? "https://api.currentsapi.services/v2/search"
         : "https://api.currentsapi.services/v2/latest-news"
+
+    console.log("Fetching from Currents API:", `${endpoint}?${params.toString()}`)
 
     const res = await fetch(
       `${endpoint}?apiKey=${process.env.CURRENTNEWS_API_KEY}&${params.toString()}`,

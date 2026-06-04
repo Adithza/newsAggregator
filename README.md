@@ -487,15 +487,4 @@ Server-side rate limiting is implemented using:
 
 ---
 
-## Future Improvements
 
-* Additional news providers
-* RSS feed integration
-* Saved articles
-* Personalized recommendations
-* AI-generated summaries
-* Trending topic analysis
-* Progressive Web App support
-* Offline reading support
-
----

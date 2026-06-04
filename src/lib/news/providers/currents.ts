@@ -40,7 +40,6 @@ export const currentsProvider: NewsProvider = {
     if (request.startDate && request.endDate) {
       params.append("start_date", new Date(request.startDate).toISOString())
       params.append("end_date", new Date(request.endDate).toISOString())
-      console.log(params.toString())
       request.mode = "search"
     }
 
@@ -57,14 +56,12 @@ export const currentsProvider: NewsProvider = {
     params.append("language", "en")
     params.append("page_size", "10")
 
-    console.log(params.toString())
 
     const endpoint =
       request.mode === "search"
         ? "https://api.currentsapi.services/v2/search"
         : "https://api.currentsapi.services/v2/latest-news"
 
-    console.log("Fetching from Currents API:", `${endpoint}?${params.toString()}`)
 
     const res = await fetch(
       `${endpoint}?apiKey=${process.env.CURRENTNEWS_API_KEY}&${params.toString()}`,

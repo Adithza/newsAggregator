@@ -74,7 +74,6 @@ const subtractDays = (dateStr: string, days: number) => {
         if (endDate) params.set("endDate", endDate)
 
         router.push(`/searchPage?${params.toString()}`);
-        console.log('Searching for:', searchTerm, 'categories:', categories, 'startDate', startDate, 'endDate', endDate);
       }}>
         <div>
           <Search className='absolute ml-3 mt-3 text-gray-400' size={20} />

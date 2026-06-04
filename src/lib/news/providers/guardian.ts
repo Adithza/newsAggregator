@@ -39,10 +39,6 @@ export const guardianProvider: NewsProvider = {
         "from-date",
         new Date(request.startDate).toISOString()
       )
-      console.log("Date filter params:", {
-        "from-date": new Date(request.startDate).toISOString(),
-        "to-date": new Date(request.endDate).toISOString(),
-      })
     }
 
     if (request.cursor != null) {

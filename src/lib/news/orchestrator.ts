@@ -45,6 +45,19 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
     throw new Error("Invalid category")
   }
 
+  if (input.startDate && input.endDate) {
+    const sDate = new Date(input.startDate)
+    const eDate = new Date(input.endDate)
+
+    if (eDate <= sDate) {
+      throw new Error("End date must be after start date")
+    }
+
+    if (eDate.getTime() - sDate.getTime() > 15 * 1000 * 60 * 60 * 24) {
+      throw new Error("Date range must be within 15 days")
+    }
+  }
+
   assertProvidersConfigured()
 
   const pagination = decodePagination(input.page)

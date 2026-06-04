@@ -88,7 +88,7 @@ const subtractDays = (dateStr: string, days: number) => {
         </div>
 
         {categoryOptions.map((option) => (
-          <div key={option.id}>
+          <div key={option.id} className='p-1'>
             <input
               type="checkbox"
               id={option.id}
@@ -98,7 +98,7 @@ const subtractDays = (dateStr: string, days: number) => {
               onChange={() => toggleCategory(option.value)}
               className='text-white'
             />
-            <label htmlFor={option.id} className='ml-2 text-sm text-gray-400'>
+            <label htmlFor={option.id} className='ml-2 text-sm text-gray-400 font-semibold'>
               {option.label}
             </label>
           </div>
@@ -117,7 +117,7 @@ const subtractDays = (dateStr: string, days: number) => {
                     : maxDate
           }
           onChange={(e) => setStartDate(e.target.value)}
-          className="mt-2 text-sm text-gray-400"
+          className="mt-2 text-sm text-gray-400 bg-gray-900 rounded-sm"
           />
 
           <label className="mx-2 text-sm text-gray-400">to</label>
@@ -134,7 +134,7 @@ const subtractDays = (dateStr: string, days: number) => {
                 : maxDate
           }
           onChange={(e) => setEndDate(e.target.value)}
-          className="mt-2 text-sm text-gray-400"
+          className="mt-2 text-sm text-gray-400 bg-gray-900 rounded-sm"
         />
         </div>
         <label className="mt-2 text-sm text-gray-400">* Dates must be within the last 3 months and 15 days of each other</label>

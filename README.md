@@ -1,31 +1,57 @@
 # DailyPlanet - News Aggregator
 
-DailyPlanet is a modern, high-performance news aggregator application built using Next.js 16 and React 19. It aggregates news from multiple third-party providers (The Guardian and NewsData.io), applies client-side infinite scrolling, and integrates server-side rate limiting.
+DailyPlanet is a modern, high-performance news aggregation platform built using Next.js 16 and React 19.
 
-Live URL: [https://news-aggregator-olive-delta.vercel.app/](https://news-aggregator-olive-delta.vercel.app/)
+The application aggregates news from multiple providers including The Guardian, NewsData.io, and Currents API through a provider-based architecture. Articles are normalized into a unified schema, deduplicated, sorted chronologically, and served through a single API.
+
+DailyPlanet supports:
+
+* Cross-provider news aggregation
+* Global article search
+* Category filtering
+* Country filtering
+* Date-range filtering
+* Infinite scrolling
+* Composite cursor pagination
+* Provider failover
+* Server-side caching
+* Redis-backed rate limiting
+
+Live URL: https://news-aggregator-olive-delta.vercel.app/
 
 ---
 
 ## Setup Instructions
 
 ### 1. Prerequisites
+
 Ensure you have the following installed:
-* [Node.js](https://nodejs.org/) (v20+ recommended)
+
+* Node.js (v20+ recommended)
 * npm, yarn, or pnpm
 
 ### 2. Obtain API Keys
+
 You will need API keys and configuration credentials from:
-1. **The Guardian Open Platform**: [Sign up here](https://open-platform.theguardian.com/access/) to get a free developer key.
-2. **NewsData.io**: [Create an account here](https://newsdata.io/) to get a free API key.
-3. **Upstash Redis**: [Create a database here](https://upstash.com/) and copy the REST API credentials.
+
+1. **The Guardian Open Platform**
+2. **NewsData.io**
+3. **Currents API**
+4. **Upstash Redis**
 
 ### 3. Environment Configuration
+
 Create a `.env` file in the root directory of the project and populate it with your keys:
 
 ```env
 GUARDIANAPI_KEY="your-guardian-api-key"
+
 NEWSDATA_API_KEY="your-newsdata-api-key"
+
+CURRENTNEWS_API_KEY="your-currents-api-key"
+
 UPSTASH_REDIS_REST_URL="your-upstash-redis-rest-url"
+
 UPSTASH_REDIS_REST_TOKEN="your-upstash-redis-rest-token"
 ```
 
@@ -34,18 +60,26 @@ UPSTASH_REDIS_REST_TOKEN="your-upstash-redis-rest-token"
 
 ### 4. Installation and Running
 
-To install dependencies:
+Install dependencies:
+
 ```bash
 npm install
 ```
 
-To run the development server:
+Run the development server:
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-To build and start the production build:
+Open:
+
+```text
+http://localhost:3000
+```
+
+Build and run production:
+
 ```bash
 npm run build
 npm run start
@@ -53,131 +87,415 @@ npm run start
 
 ---
 
+## Architecture Overview
+
+DailyPlanet uses a provider-based architecture that separates provider-specific logic from aggregation logic.
+
+### Provider Registry
+
+All providers implement a shared interface and are registered through a central registry.
+
+Current providers:
+
+* The Guardian
+* NewsData.io
+* Currents API
+
+This architecture allows new providers to be added without modifying the orchestration layer.
+
+### Unified Orchestration
+
+Both the news feed and search endpoints use the same orchestration pipeline.
+
+The orchestrator:
+
+1. Selects compatible providers
+2. Executes requests in parallel
+3. Normalizes provider responses
+4. Removes duplicate articles
+5. Sorts articles chronologically
+6. Generates a unified pagination cursor
+
+### Capability-Based Filtering
+
+Providers advertise supported capabilities:
+
+* Country filtering
+* Date filtering
+
+The registry automatically excludes providers that cannot satisfy the requested filters.
+
+| Filter Applied       | Active Providers             |
+| -------------------- | ---------------------------- |
+| None                 | Guardian, NewsData, Currents |
+| Country              | NewsData, Currents           |
+| Date Range           | Guardian, Currents           |
+| Country + Date Range | Currents                     |
+
+### Unified Article Schema
+
+```typescript
+{
+  title: string;
+  url: string;
+  category: string[];
+  source: string;
+  publishedAt: string;
+  content: string;
+  byline?: string;
+  thumbnail: string;
+}
+```
+
+### Parallel Aggregation
+
+Providers are queried concurrently to reduce response times.
+
+If one provider fails, the application continues operating using the remaining providers.
+
+---
+
 ## API Integration Approach
 
-DailyPlanet integrates articles from **The Guardian** and **NewsData.io** through serverless endpoints:
+### Unified Schema Normalization
 
-1. **Unified Schema Normalization**:
-   Each API has its own response fields (e.g. `webTitle` vs `title`, `webUrl` vs `link`). In `src/lib/normalize.ts`, raw items are mapped to a standardized article schema:
-   ```typescript
-   {
-       title: string;
-       url: string;
-       category: string[];
-       source: string;
-       publishedAt: string; // ISO 8601 Date
-       content: string;
-       byline?: string;
-       thumbnail: string;
-   }
-   ```
+Each provider exposes different response formats.
 
-2. **Unified Aggregation**:
-   The fetched articles are combined and sorted chronologically (newest first) by publication date in `src/lib/aggregate.ts`.
+Examples:
 
-3. **Composite Cursor Pagination**:
-   To fetch the next pages of both APIs seamlessly, the system uses custom cursors (`src/lib/cursorEncoder.ts`). The page state is stored as a JSON object containing pagination parameters for both API endpoints (e.g., page numbers and cursors), base64-encoded, and returned to the client as a single `nextPage` token for continuous loading.
+* `webTitle` vs `title`
+* `webUrl` vs `link`
+
+Provider responses are normalized into a shared article schema in `src/lib/normalize.ts`.
+
+### Unified Aggregation
+
+Normalized articles are:
+
+1. Combined into a single collection
+2. Deduplicated
+3. Sorted chronologically
+
+This logic is handled in `src/lib/aggregate.ts`.
+
+### Composite Cursor Pagination
+
+Provider-specific pagination state is combined into a single cursor.
+
+The cursor stores:
+
+```json
+{
+  "guardianPage": 2,
+  "newsCursor": "abc123",
+  "currentNewsCursor": 3
+}
+```
+
+The state is Base64 encoded and returned to the client as a single `nextPage` token.
 
 ---
 
 ## API Endpoints Documentation
 
-The application exposes internal API routes that aggregate results and can be accessed directly or by external services.
+The application exposes internal API routes that aggregate results and can also be consumed externally.
 
 ### 1. Fetch News Feed (`/api/news`)
-Fetches top headlines across different categories aggregated from all news providers.
 
-* **Method**: `GET`
-* **URL Parameters**:
-  * `category` *(optional)*: Filter articles by category. Supported options: `world`, `business`, `technology`, `science`, `sports`, `entertainment`.
-  * `page` *(optional)*: The base64 composite cursor returned by a previous query for pagination.
-* **Success Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "articles": [
-      {
-        "title": "Example Headline",
-        "url": "https://example.com/article",
-        "category": ["World News"],
-        "source": "Guardian",
-        "publishedAt": "2026-05-22T08:00:00.000Z",
-        "content": "Article summary content...",
-        "byline": "Author Name",
-        "thumbnail": "https://example.com/thumb.jpg"
-      }
-    ],
-    "nextPage": "eyJndWFyZGlhblBhZ2UiOjIsIm5ld3NDdXJzb3IiOiJleGFtcGxlIn0="
-  }
-  ```
-* **Rate Limited Response (200 OK)**:
-  ```json
-  {
-    "success": false,
-    "error": "Rate limit exceeded. Try again later."
-  }
-  ```
-* **Error Response (400 / 500)**:
-  ```json
-  {
-    "success": false,
-    "error": "Invalid category"
-  }
-  ```
+Fetches aggregated headlines across all compatible providers.
+
+#### Method
+
+```http
+GET
+```
+
+#### URL Parameters
+
+| Parameter | Required | Description                 |
+| --------- | -------- | --------------------------- |
+| category  | No       | Category filter             |
+| country   | No       | ISO country code            |
+| startDate | No       | Start date (YYYY-MM-DD)     |
+| endDate   | No       | End date (YYYY-MM-DD)       |
+| page      | No       | Composite pagination cursor |
+
+#### Example Requests
+
+```http
+GET /api/news?category=technology
+```
+
+```http
+GET /api/news?country=us
+```
+
+```http
+GET /api/news?startDate=2026-01-01&endDate=2026-01-31
+```
+
+```http
+GET /api/news?category=technology&country=us
+```
+
+#### Success Response
+
+```json
+{
+  "success": true,
+  "articles": [
+    {
+      "title": "Example Headline",
+      "url": "https://example.com/article",
+      "category": ["technology"],
+      "source": "Guardian",
+      "publishedAt": "2026-05-22T08:00:00.000Z",
+      "content": "Article content...",
+      "byline": "Author Name",
+      "thumbnail": "https://example.com/image.jpg"
+    }
+  ],
+  "nextPage": "eyJndWFyZGlhblBhZ2UiOjIsIm5ld3NDdXJzb3IiOiJhYmMxMjMifQ=="
+}
+```
+
+#### Rate Limited Response
+
+```json
+{
+  "success": false,
+  "error": "Rate limit exceeded. Try again later."
+}
+```
+
+#### Error Response
+
+```json
+{
+  "success": false,
+  "error": "Invalid category"
+}
+```
 
 ---
 
 ### 2. Search News (`/api/search`)
-Performs a keyword search across all news providers.
 
-* **Method**: `GET`
-* **URL Parameters**:
-  * `query` *(optional)*: The search term (e.g., `technology`, `science`).
-  * `category` *(optional)*: Filter search results by category.
-  * `page` *(optional)*: The base64 composite cursor for pagination.
-* **Success Response (200 OK)**:
-  ```json
-  {
-    "success": true,
-    "articles": [ ... ],
-    "nextPage": "eyJndWFyZGlhblBhZ2UiOjIsIm5ld3NDdXJzb3IiOiJleGFtcGxlIn0="
-  }
-  ```
-* **Rate Limited Response (200 OK)**:
-  ```json
-  {
-    "success": false,
-    "error": "Rate limit exceeded. Try again later."
-  }
-  ```
+Performs keyword searches across all compatible providers.
+
+#### Method
+
+```http
+GET
+```
+
+#### URL Parameters
+
+| Parameter | Required | Description                 |
+| --------- | -------- | --------------------------- |
+| query     | Yes      | Search term                 |
+| category  | No       | Category filter             |
+| country   | No       | Country filter              |
+| startDate | No       | Start date (YYYY-MM-DD)     |
+| endDate   | No       | End date (YYYY-MM-DD)       |
+| page      | No       | Composite pagination cursor |
+
+#### Example Requests
+
+```http
+GET /api/search?query=artificial+intelligence
+```
+
+```http
+GET /api/search?query=ai&category=technology
+```
+
+```http
+GET /api/search?query=election&country=us
+```
+
+```http
+GET /api/search?query=tesla&startDate=2026-01-01&endDate=2026-01-31
+```
+
+#### Success Response
+
+```json
+{
+  "success": true,
+  "articles": [],
+  "nextPage": "eyJndWFyZGlhblBhZ2UiOjIsIm5ld3NDdXJzb3IiOiJhYmMxMjMifQ=="
+}
+```
 
 ---
 
-### 3. Pagination (Using `nextPage` Cursor)
+### 3. Pagination (`nextPage` Cursor)
 
-Both `/api/news` and `/api/search` support **cursor-based pagination** using the `nextPage` token returned in the response.
+Different providers use different pagination systems:
 
-The `nextPage` value is an encoded cursor that represents the next state of pagination for both external APIs (Guardian + NewsData.io).
+| Provider    | Pagination Type |
+| ----------- | --------------- |
+| Guardian    | Page Numbers    |
+| NewsData.io | Cursor Tokens   |
+| Currents    | Page Numbers    |
 
-#### How to use it
+DailyPlanet combines provider-specific pagination state into a single Base64-encoded cursor.
 
-To fetch the next set of results, pass the `nextPage` value back into the same API using the `page` query parameter:
+Clients should treat this value as opaque and simply pass it back through the `page` query parameter.
 
-```bash
+Example:
+
+```http
 GET /api/news?page=<nextPage>
 ```
+
+---
+
+## Provider Compatibility
+
+Not all providers support the same filters.
+
+| Provider    | Search | Categories | Country Filter | Date Filter |
+| ----------- | ------ | ---------- | -------------- | ----------- |
+| Guardian    | ✅      | ✅          | ❌              | ✅           |
+| NewsData.io | ✅      | ✅          | ✅              | ❌           |
+| Currents    | ✅      | ✅          | ✅              | ✅           |
+
+The provider registry automatically excludes incompatible providers.
+
+Examples:
+
+### Country Filter
+
+```http
+GET /api/news?country=us
+```
+
+Active Providers:
+
+```text
+NewsData.io
+Currents
+```
+
+### Date Range Filter
+
+```http
+GET /api/news?startDate=2026-01-01&endDate=2026-01-31
+```
+
+Active Providers:
+
+```text
+Guardian
+Currents
+```
+
+### Country + Date Filter
+
+```http
+GET /api/news?country=us&startDate=2026-01-01&endDate=2026-01-31
+```
+
+Active Providers:
+
+```text
+Currents
+```
+
+---
+
+## Project Structure
+
+```text
+src
+├── app
+│   ├── api
+│   │   ├── news
+│   │   └── search
+│   ├── page.tsx
+│   └── searchPage
+│
+├── components
+│   ├── CatTabs.tsx
+│   ├── CountryFilter.tsx
+│   ├── GlobalSearchBar.tsx
+│   ├── localSearch.tsx
+│   ├── Navbar.tsx
+│   ├── NewsCard.tsx
+│   ├── NewsFeed.tsx
+│   └── searchContext.tsx
+│
+└── lib
+    ├── aggregate.ts
+    ├── category_map.ts
+    ├── cursorEncoder.ts
+    ├── getNews.ts
+    ├── normalize.ts
+    ├── rateLimit.ts
+    ├── reverseCatMap.ts
+    ├── searchNews.ts
+    └── news
+        ├── orchestrator.ts
+        ├── pagination.ts
+        ├── registry.ts
+        ├── types.ts
+        └── providers
+            ├── guardian.ts
+            ├── newsdata.ts
+            ├── currents.ts
+            └── types.ts
+```
+
+---
 
 ## Caching Strategy & Rate Limiting
 
 ### Next.js Fetch Caching
+
 To optimize third-party API usage and decrease load times:
-* News fetches from external endpoints use Next.js fetch caching: `{ next: { revalidate: 300 } }`.
-* This caches the responses on the server for 5 minutes, significantly reducing the usage of daily API key quotas.
+
+```ts
+{
+  next: {
+    revalidate: 300
+  }
+}
+```
+
+Responses are cached for 5 minutes, reducing API quota usage and improving response times.
 
 ### Rate Limiting (Upstash Redis)
-To prevent API abuse and control hosting costs, server-side rate limits are enforced on the API endpoints using `@upstash/ratelimit` connected to an Upstash Redis database:
-* **Search Route (`/api/search`)**: Limited to **5 requests per 20 seconds** per IP address.
-* **News Route (`/api/news`)**: Limited to **20 requests per 60 seconds** per IP address.
+
+Server-side rate limiting is implemented using:
+
+* Upstash Redis
+* @upstash/ratelimit
+
+#### Search Route (`/api/search`)
+
+```text
+5 requests per 20 seconds per IP
+```
+
+#### News Route (`/api/news`)
+
+```text
+20 requests per 60 seconds per IP
+```
 
 ---
 
+## Future Improvements
+
+* Additional news providers
+* RSS feed integration
+* Saved articles
+* Personalized recommendations
+* AI-generated summaries
+* Trending topic analysis
+* Progressive Web App support
+* Offline reading support
+
+---

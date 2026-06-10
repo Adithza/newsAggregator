@@ -82,6 +82,10 @@ export function normalizeCurrentNewsArticle(article: any, countryFilter?: string
 
 export function normalizeCategories(input: string[] = []): string[] {
   return input
-    .map(c => API_TO_CATEGORY_MAP[c.toLowerCase()])
+    .flatMap((c) => {
+      const mapped = API_TO_CATEGORY_MAP[c.toLowerCase()];
+      if (!mapped) return [];
+      return Array.isArray(mapped) ? mapped : [mapped];
+    })
     .filter((c): c is Category => Boolean(c));
 }

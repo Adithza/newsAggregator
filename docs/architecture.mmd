@@ -1,0 +1,30 @@
+flowchart TD
+    A[Client Browser]
+    B[Next.js Frontend]
+    C[API Routes]
+    D[Orchestrator]
+    E[Provider Registry]
+
+    F[Guardian Provider]
+    G[NewsData Provider]
+    H[Currents Provider]
+
+    I[Normalization Layer]
+    J[Aggregation Layer]
+    K[Response]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    E --> F
+    E --> G
+    E --> H
+
+    F --> I
+    G --> I
+    H --> I
+
+    I --> J
+    J --> K

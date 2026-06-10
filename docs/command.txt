@@ -1,0 +1,9 @@
+pandoc technical.md \
+          -o technical.pdf \
+          --pdf-engine=lualatex \
+          -H header.tex \
+          --highlight-style=tango \
+          --toc \
+          -V geometry:margin=0.75in \
+          -V fontsize=11pt \
+        -V subtitle="Ver 1.0"

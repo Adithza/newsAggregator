@@ -1,6 +1,7 @@
 import { CATEGORY_MAP } from "./category_map";
 
 type Category = keyof typeof CATEGORY_MAP;
+type ApiCategory = Category | Category[];
 
 const CATEGORY_ALIASES: Record<string, Category> = {
   top: "world",
@@ -22,18 +23,37 @@ const CATEGORY_ALIASES: Record<string, Category> = {
   breaking: "world",
 };
 
-export const API_TO_CATEGORY_MAP: Record<string, Category> = {
+export const API_TO_CATEGORY_MAP: Record<string, ApiCategory> = {
   ...CATEGORY_ALIASES
 };
+
+function addCategoryMapping(key: string, category: Category) {
+  const normalizedKey = key.toLowerCase();
+  const existing = API_TO_CATEGORY_MAP[normalizedKey];
+
+  if (!existing) {
+    API_TO_CATEGORY_MAP[normalizedKey] = category;
+    return;
+  }
+
+  if (Array.isArray(existing)) {
+    if (!existing.includes(category)) {
+      API_TO_CATEGORY_MAP[normalizedKey] = [...existing, category];
+    }
+    return;
+  }
+
+  if (existing !== category) {
+    API_TO_CATEGORY_MAP[normalizedKey] = [existing, category];
+  }
+}
 
 for (const key in CATEGORY_MAP) {
   const category = key as Category;
 
   const mapping = CATEGORY_MAP[category];
 
-  API_TO_CATEGORY_MAP[mapping.guardian.toLowerCase()] = category;
-
-  API_TO_CATEGORY_MAP[mapping.newsData.toLowerCase()] = category;
-
-  API_TO_CATEGORY_MAP[mapping.currentNews.toLowerCase()] = category;
+  addCategoryMapping(mapping.guardian, category);
+  addCategoryMapping(mapping.newsData, category);
+  addCategoryMapping(mapping.currentNews, category);
 }

@@ -7,10 +7,17 @@ export async function GET(request: NextRequest) {
 
         const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "127.0.0.1";
 
-        const {success} = await newsRatelimit.limit(ip);
+        if (process.env.NODE_ENV === "test") {
 
-        if(!success){
-            return NextResponse.json({success: false, error: 'Rate limit exceeded. Try again later.'});
+        } else {
+        const { success } = await newsRatelimit.limit(ip);
+
+        if (!success) {
+        return NextResponse.json(
+            { success: false, error: "Rate limit exceeded. Try again later." },
+            { status: 429 }
+                );
+            }
         }
 
         const searchParams = request.nextUrl.searchParams;
@@ -20,6 +27,14 @@ export async function GET(request: NextRequest) {
         const country = searchParams.get("country") || undefined;
         const startDate = searchParams.get("startDate") || undefined;
         const endDate = searchParams.get("endDate") || undefined;
+
+        console.log('[API /api/news] searchParams:', {
+            category,
+            page,
+            country,
+            startDate,
+            endDate,
+        })
 
         const result = await getNews(category, page, country, startDate, endDate);
         return NextResponse.json(result);

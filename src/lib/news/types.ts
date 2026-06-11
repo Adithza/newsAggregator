@@ -31,6 +31,7 @@ export type PaginationState = {
   guardianPage?: number
   newsCursor?: string
   currentNewsCursor?: string | number
+  timestamp?: number
 }
 
 export type NewsPageResult = {

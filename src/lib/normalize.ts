@@ -72,7 +72,7 @@ export function normalizeCurrentNewsArticle(article: any, countryFilter?: string
         url: article.url,
         category: (article.category ? article.category : "general"),
         source : "CurrentNews",
-        publishedAt: new Date(article.published),
+        publishedAt: new Date(article.published).toISOString(),
         content: article.description,
         byline: (article.author ? article.author: undefined),
         thumbnail: resolveThumbnail(article.image),

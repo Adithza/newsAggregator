@@ -1,14 +1,25 @@
 import type { PaginationState } from "./types"
 
 export function encodePagination(state: PaginationState): string {
-  return Buffer.from(JSON.stringify(state)).toString("base64")
+  const stateWithTimestamp = {
+    ...state,
+    timestamp: Date.now(),
+  }
+  return Buffer.from(JSON.stringify(stateWithTimestamp)).toString("base64")
 }
 
-export function decodePagination(page?: string): PaginationState {
+export function decodePagination(page?: string, maxAgeMs = 5 * 60 * 1000): PaginationState {
   if (!page) return {}
 
   try {
     const decoded = JSON.parse(Buffer.from(page, "base64").toString("utf-8"))
+
+    // Check if cursor has expired
+    if (decoded.timestamp && Date.now() - decoded.timestamp > maxAgeMs) {
+      throw new Error(
+        `Page cursor expired: ${Math.round((Date.now() - decoded.timestamp) / 1000)}s old`
+      )
+    }
 
     return {
       guardianPage:

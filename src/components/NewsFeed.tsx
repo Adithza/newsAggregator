@@ -202,6 +202,9 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
           {!isLocalSearchActive && !hasMore && !isRateLimited && articles.length > 0 && (
             <p className="text-gray-500">No more articles</p>
           )}
+          {filteredArticles.length === 0 && !isLoading && (
+            <p className="text-gray-500">No articles found for given filters</p>
+          )}
         </div>
 
       </div>

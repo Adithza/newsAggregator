@@ -33,6 +33,14 @@ function normalizeArticleCategories(category: unknown): string[] {
 }
 
 export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> {
+  console.log('[orchestrator] fetchNews input:', {
+    query: input.query,
+    category: input.category,
+    startDate: input.startDate,
+    endDate: input.endDate,
+    page: input.page,
+  })
+
   const mode = input.query?.trim() ? "search" : "headlines"
 
   const categories = Array.isArray(input.category)
@@ -49,20 +57,40 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
     const sDate = new Date(input.startDate)
     const eDate = new Date(input.endDate)
 
+    console.log('[orchestrator] parsed dates:', { sDate: sDate.toISOString(), eDate: eDate.toISOString(), sTime: sDate.getTime(), eTime: eDate.getTime() })
+
     if (eDate <= sDate) {
-      throw new Error("End date must be after start date")
+      throw new Error("Invalid Date range: End date must be after start date")
     }
 
     if (eDate.getTime() - sDate.getTime() > 15 * 1000 * 60 * 60 * 24) {
-      throw new Error("Date range must be within 15 days")
+      throw new Error("Invalid Date range: Date range must be within 15 days")
     }
   }
 
   assertProvidersConfigured()
 
-  const pagination = decodePagination(input.page)
+  let pagination: PaginationState = {}
+  let paginationReset = false
+
+  // Try to decode the cursor; if expired, reset to page 1
+  if (input.page) {
+    try {
+      pagination = decodePagination(input.page)
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      if (errorMsg.includes("expired")) {
+        console.log('[orchestrator] Page cursor expired, resetting pagination')
+        paginationReset = true
+        pagination = {} // Reset to page 1
+      } else {
+        throw error // Re-throw if it's a different error
+      }
+    }
+  }
+
   const providers = getActiveProviders({ country: input.country, startDate: input.startDate, endDate: input.endDate })
-  const isPaginated = Boolean(input.page)
+  const isPaginated = Boolean(input.page) && !paginationReset
 
   const results = await Promise.all(
     providers.map(async (provider) => {
@@ -102,6 +130,7 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
     ...article,
     category: normalizeArticleCategories(article.category),
   }))
+
 
   const nextState: PaginationState = {
     guardianPage: byId.guardian?.nextCursor as number | undefined,

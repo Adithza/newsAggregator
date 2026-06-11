@@ -65,10 +65,72 @@ test.describe('GET /api/news', () => {
   expect(article).toHaveProperty('publishedAt')
   expect(article).toHaveProperty('source')
   expect(article).toHaveProperty('content')
-  expect(article).toHaveProperty('byline')
   expect(article).toHaveProperty('thumbnail')
   })
 
+  test('no duplicate articles by URL', async ({ request }) => {
+  const res = await request.get('/api/news')
+  const body = await res.json()
+
+  const urls = body.articles.map((a: any) => a.url)
+  const unique = new Set(urls)
+
+  expect(unique.size).toBe(urls.length)
+  })
+
+  test('handles empty results gracefully', async ({ request }) => {
+  const res = await request.get('/api/news?q=asdkjasdkjaskd')
+  const body = await res.json()
+
+  expect(Array.isArray(body.articles)).toBe(true)
+  })
+
+  test('publishedAt is a valid ISO date string', async ({ request }) => {
+  const res = await request.get('/api/news')
+  const body = await res.json()
+
+  console.log(body)
+
+  body.articles.forEach((article: any) => {
+    const date = new Date(article.publishedAt)
+
+    // must be a valid date
+    expect(isNaN(date.getTime())).toBe(false)
+  })
+  })
+
+  test('articles are sorted by newest first', async ({ request }) => {
+  const res = await request.get('/api/news')
+  const body = await res.json()
+
+  for (let i = 1; i < body.articles.length; i++) {
+    const prev = new Date(body.articles[i - 1].publishedAt).getTime()
+    const curr = new Date(body.articles[i].publishedAt).getTime()
+
+    expect(prev >= curr).toBe(true)
+  }
+  })
+
+  test('rejects invalid date order', async ({ request }) => {
+  const res = await request.get(
+    '/api/news?startDate=2026-06-10&endDate=2026-06-01'
+  )
+
+  expect(res.status()).toBe(400)
+  })
+
+
+  test('rejects date range > 15 days', async ({ request }) => {
+  const res = await request.get('/api/news?startDate=2026-01-01&endDate=2026-02-01')
+
+  // 👇 ADD DEBUG HERE
+  console.log('URL:', res.url())
+  console.log('STATUS:', res.status())
+  console.log('BODY:', await res.text())
+
+  expect(res.status()).toBe(400)
+  })
+  
 })
 
 

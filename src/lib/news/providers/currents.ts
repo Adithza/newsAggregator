@@ -10,7 +10,8 @@ export const currentsProvider: NewsProvider = {
   supportsDateFilter: true,
 
   isEnabled() {
-    return Boolean(process.env.CURRENTNEWS_API_KEY)
+    //return Boolean(process.env.CURRENTNEWS_API_KEY)
+    return false
   },
 
   resolveCategory(appCategory: string) {

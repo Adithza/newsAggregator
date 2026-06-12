@@ -7,15 +7,18 @@ export async function GET(request: NextRequest) {
 
         const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "127.0.0.1";
 
-        if (process.env.NODE_ENV === "test") {
+        console.log("NODE_ENV:", process.env.NODE_ENV, "TEST_MODE:", process.env.TEST_MODE);
 
-        } else {
-        const { success } = await newsRatelimit.limit(ip);
+        const skipRateLimit =
+            process.env.NODE_ENV === 'test' || process.env.TEST_MODE === 'true';
 
-        if (!success) {
-        return NextResponse.json(
-            { success: false, error: "Rate limit exceeded. Try again later." },
-            { status: 429 }
+        if (!skipRateLimit) {
+            const { success } = await newsRatelimit.limit(ip);
+
+            if (!success) {
+                return NextResponse.json(
+                    { success: false, error: "Rate limit exceeded. Try again later." },
+                    { status: 429 }
                 );
             }
         }

@@ -74,7 +74,14 @@ export default defineConfig({
    webServer: {
      command: 'npm run dev',
      url: 'http://localhost:3000',
-     reuseExistingServer: !process.env.CI,
+    // Ensure Playwright starts the dev server so `webServer.env` is applied.
+    // When `reuseExistingServer` is true, Playwright may reuse an existing
+    // server that was not launched with TEST_MODE=true.
+    reuseExistingServer: false,
+     env: {
+       NODE_ENV: 'test',
+       TEST_MODE: 'true',
+     },
    },
 
    

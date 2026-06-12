@@ -1,17 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchNews } from "@/lib/searchNews";
-import { searchRatelimit } from "@/lib/rateLimit";
+import { newsRatelimit, searchRatelimit } from "@/lib/rateLimit";
 
 export async function GET(request: NextRequest) {
     try{
 
         const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "127.0.0.1";
         
-        const {success} = await searchRatelimit.limit(ip);
-        
-        if(!success){
-            console.log(`Rate limit exceeded for IP: ${ip}`);
-            return NextResponse.json({success: false, error: 'Rate limit exceeded. Try again later.'});
+        console.log("NODE_ENV:", process.env.NODE_ENV, "TEST_MODE:", process.env.TEST_MODE);
+
+        const skipRateLimit =
+            process.env.NODE_ENV === 'test' || process.env.TEST_MODE === 'true';
+
+        if (!skipRateLimit) {
+            const { success: searchSuccess } = await searchRatelimit.limit(ip);
+
+            if (!searchSuccess) {
+                console.log(`Rate limit exceeded for IP: ${ip}`);
+                return NextResponse.json(
+                    { success: false, error: "Rate limit exceeded. Try again later." },
+                    { status: 429 }
+                );
+            }
+
+            const { success: newsSuccess } = await newsRatelimit.limit(ip);
+
+            if (!newsSuccess) {
+                return NextResponse.json(
+                    { success: false, error: "Rate limit exceeded. Try again later." },
+                    { status: 429 }
+                );
+            }
         }
 
         const searchParams = request.nextUrl.searchParams;

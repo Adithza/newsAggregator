@@ -1,11 +1,12 @@
-\newpage
-
 ---
 title: "DailyPlanet Technical Design Document"
-subtitle: "Ver 1.0"
+subtitle: "Ver 1.1"
 date: "2026"
 toc: true
+chapters: true
 ---
+
+\newpage
 
 # DailyPlanet Technical Design Document
 
@@ -29,29 +30,55 @@ Provider responses are normalized into a common article schema before being aggr
 
 ![High-Level Architecture](/home/adithya/Documents/Projects/DUK/newsaggregator/docs/architecture.png)
 
+![cursor flow diagram](/home/adithya/Documents/Projects/DUK/newsaggregator/docs/cursorFlow.png)
+
 \newpage
 
 ## 3. Technology Stack
 
-+---------------+------------------------------------+
-| Technology    | Purpose                            |
-+===============+====================================+
-| Next.js 16    | Frontend framework and API routes  |
-+---------------+------------------------------------+
-| React 19      | User interface development         |
-+---------------+------------------------------------+
-| TypeScript    | Type safety and maintainability    |
-+---------------+------------------------------------+
-| Upstash Redis | Distributed rate limiting          |
-+---------------+------------------------------------+
-| Guardian API  | News provider                      |
-+---------------+------------------------------------+
-| NewsData.io   | News provider                      |
-+---------------+------------------------------------+
-| Currents API  | News provider                      |
-+---------------+------------------------------------+
-| Vercel        | Application hosting and deployment |
-+---------------+------------------------------------+
++---------------+---------+------------------------------------+
+| Technology    | Version | Purpose                            |
++===============+=========+====================================+
+| Next.js       | 16.2.6  | Frontend framework and API routes  |
++---------------+---------+------------------------------------+
+| React         | 19.2.4  | User interface development         |
++---------------+---------+------------------------------------+
+| TypeScript    | 5.9.3   | Type safety and maintainability    |
++---------------+---------+------------------------------------+
+| Upstash Redis | 1.38.0  | Distributed rate limiting          |
++---------------+---------+------------------------------------+
+| Guardian API  | N/A     | News provider                      |
++---------------+---------+------------------------------------+
+| NewsData.io   | N/A     | News provider                      |
++---------------+---------+------------------------------------+
+| Currents API  | N/A     | News provider                      |
++---------------+---------+------------------------------------+
+| Vercel        | N/A     | Application hosting and deployment |
++---------------+---------+------------------------------------+
+| Playwright    | 1.6.0   | API and E2E testing                |
++---------------+---------+------------------------------------+
+| Tailwind CSS  | 4.3.0   | Styling                            |
++---------------+---------+------------------------------------+
+
+### 3.1 Technology Selection Rationale
+
+Several technologies were selected based on their suitability for a scalable, maintainable, and serverless news aggregation platform.
+
+- **Next.js 16** was chosen because it provides both frontend rendering and backend API route capabilities within a single framework. This simplifies development by enabling the entire application stack to be implemented using a unified technology platform while also streamlining deployment and maintenance.
+
+- **React 19** enables the development of reusable and modular user interface components. Its component-based architecture improves maintainability, promotes code reuse, and supports the creation of responsive user experiences.
+
+- **TypeScript 5.9.3** was selected to improve code quality and maintainability through static type checking. Strong typing reduces runtime errors, improves tooling support, and makes the codebase easier to understand and extend.
+
+- **Guardian API**, **NewsData.io**, and **Currents API** were selected to provide diverse and complementary news sources. Integrating multiple providers improves article coverage across categories and regions while reducing dependence on any single external service.
+
+- **Vercel** was chosen as the deployment platform due to its native support for Next.js applications, automated deployment workflows, serverless execution model, and globally distributed infrastructure. These features simplify application hosting while supporting scalability and high availability.
+
+- **Playwright** was selected for testing because it supports both API testing and end-to-end browser testing within a single framework. This enables automated verification of application functionality and improves confidence in system reliability.
+
+- **Tailwind CSS 4.3.0** was chosen to accelerate frontend development through utility-first styling. Its approach encourages consistent design patterns while reducing the amount of custom CSS required.
+
+- **Upstash Redis** was selected for distributed rate limiting because it provides a serverless Redis solution that integrates well with Vercel deployments. Alternatives such as in-memory rate limiting were unsuitable because rate-limit counters would not be shared across multiple serverless instances, while self-hosted or traditionally managed Redis deployments would introduce additional infrastructure management overhead. Upstash provides persistent, shared storage for rate-limit data without requiring dedicated infrastructure.
 
 ## 4. System Components
 
@@ -107,7 +134,7 @@ Responsible for:
 
 ## 5. Request Flow
 
-`![High-Level Architecture](/home/adithya/Documents/Projects/DUK/newsaggregator/docs/requestflow.svg)
+![Request Flow](/home/adithya/Documents/Projects/DUK/newsaggregator/docs/requestflow.svg)
 
 ### 5.1 News Feed Flow
 
@@ -252,6 +279,12 @@ The registry evaluates provider capabilities before request execution and automa
 
 This approach allows filtering behavior to remain consistent while supporting providers with different feature sets.
 
+### 7.5 All-Provider Exclusion
+
+If a filter combination excludes all enabled providers, the system does not return a special error. Instead, the orchestrator completes successfully and returns an empty article list.
+
+Because provider selection is performed before any provider fetch occurs, this edge case is handled as an empty result set rather than a failure. The response still follows the normal API shape, but no provider-specific results are included.
+
 ## 8. Pagination Design
 
 DailyPlanet aggregates content from multiple news providers, each of which exposes a different pagination mechanism. While Guardian and Currents use page-based pagination, NewsData uses cursor-based pagination.
@@ -269,6 +302,8 @@ In DailyPlanet, each provider maintains its own pagination state:
 * NewsData uses cursor tokens
 
 As a result, the client cannot directly interact with provider-specific pagination mechanisms.
+
+\newpage
 
 ### 8.2 Composite Cursor Model
 
@@ -303,7 +338,30 @@ This approach hides provider-specific implementation details from the client whi
 5. The client supplies the cursor in subsequent requests.
 6. The pagination layer decodes the cursor and restores provider-specific state.
 
-### 8.5 Benefits
+![cursor request flow diagram](/home/adithya/Documents/Projects/DUK/newsaggregator/docs/cursorRequestFlow.svg)
+
+
+### 8.5 Page Size Behavior
+
+DailyPlanet does not enforce a single global maximum page size for the composite feed. The number of articles returned per request depends on the active providers and their individual batching behavior.
+
+* `Currents` is explicitly configured with `page_size=10`.
+* `Guardian` and `NewsData` use their provider defaults because no page size override is set in the current implementation.
+* The final article count is the result of aggregating provider batches and de-duplicating overlapping content, so the actual number returned may be higher or lower than any one provider's page size.
+
+\newpage
+
+### 8.6 Cursor Expiration and Stale Cursors
+
+The composite pagination token is a base64-encoded representation of provider-specific pagination state plus an encoded timestamp.
+
+* Each cursor is generated with `encodePagination()` and includes `Date.now()`.
+* `decodePagination()` validates the cursor age against a freshness window (currently 5 minutes).
+* If the cursor is older than the configured window, it is treated as expired and the orchestrator resets pagination to the first page for all providers.
+* This expired cursor behavior is handled silently: the API still returns a successful response with fresh results and a new composite cursor.
+* Clients should avoid reusing old cursors for long-lived sessions and should prefer the latest `nextPage` token returned by the API.
+
+### 8.7 Benefits
 
 The composite cursor model provides several advantages:
 
@@ -437,6 +495,13 @@ DailyPlanet exposes two primary API endpoints that provide access to aggregated 
 GET /api/news
 ```
 
+**Response Status**
+
+* `200 OK` - Success, articles returned
+* `400 Bad Request` - Invalid parameters
+* `429 Too Many Requests` - Rate limit exceeded
+* `500 Internal Server Error` - Server-side failure
+
 **Purpose**
 
 Returns aggregated news articles from all compatible providers.
@@ -470,6 +535,13 @@ Returns aggregated news articles from all compatible providers.
 ```text
 GET /api/search
 ```
+
+**Response Status**
+
+* `200 OK` - Success, search results returned
+* `400 Bad Request` - Invalid parameters
+* `429 Too Many Requests` - Rate limit exceeded
+* `500 Internal Server Error` - Server-side failure
 
 **Purpose**
 
@@ -515,6 +587,32 @@ All provider responses are normalized into a common schema before being returned
 }
 ```
 
+The aggregation layer normalizes responses from multiple providers into a unified article schema. Some fields are optional because they depend on the metadata supplied by the source provider.
+
++-------------+----------+----------+----------+
+| Field       | Guardian | NewsData | Currents |
++=============+==========+==========+==========+
+| title       | Yes      | Yes      | Yes      |
++-------------+----------+----------+----------+
+| url         | Yes      | Yes      | Yes      |
++-------------+----------+----------+----------+
+| category    | Yes      | Yes**    | Yes**    |
++-------------+----------+----------+----------+
+| source      | Yes      | Yes      | Yes      |
++-------------+----------+----------+----------+
+| publishedAt | Yes      | Yes      | Yes      |
++-------------+----------+----------+----------+
+| content     | Yes*     | Yes*     | Yes*     |
++-------------+----------+----------+----------+
+| byline      | Yes*     | Yes*     | Yes*     |
++-------------+----------+----------+----------+
+| thumbnail   | Yes*     | Yes*     | Yes*     |
++-------------+----------+----------+----------+
+
+\* Availability depends on the metadata supplied by the provider for a specific article.
+
+** If no category is supplied by the provider, the normalization layer assigns the default category `general`.
+
 This abstraction allows client applications to consume news content without requiring knowledge of provider-specific response formats.
 
 ---
@@ -540,18 +638,89 @@ Error responses follow a consistent structure:
 }
 ```
 
-Errors may be returned for:
+The following HTTP status codes are used:
 
-* Invalid request parameters
-* Missing search terms
-* Rate limit violations
-* Internal server errors
+| Status Code | Scenario                                                                           |
+| ----------- | ---------------------------------------------------------------------------------- |
+| 400         | Invalid request parameters (e.g., invalid category, invalid date range)           |
+| 429         | Rate limit exceeded for the requesting IP address                                 |
+| 500         | Internal server error (e.g., cursor decoding failure, provider request failure)   |
 
-## 12. Testing Strategy
+Common error cases:
+
+* **400 Bad Request**: Invalid request parameters
+  * Invalid category filter
+  * Invalid date range (end date before start date, range exceeds 15 days)
+  * Invalid pagination cursor
+  * Missing required parameters
+
+* **429 Too Many Requests**: Rate limit violations
+  * Excessive requests from a single IP address within a time window
+
+* **500 Internal Server Error**: Server-side failures
+  * Provider API failures (after graceful handling)
+  * Cursor decoding failures
+  * Unexpected service errors
+
+## 12. Security Considerations
+
+### 12.1 API Key Management
+
+All external API keys (Guardian, NewsData.io, Currents API) are stored as environment variables and are not hardcoded in the codebase.
+
+- API keys are loaded from `.env` / deployment environment configuration
+- Keys are never exposed to the client-side bundle
+- Access is restricted to server-side API routes only
+
+In production, these environment variables are managed through the deployment platform (e.g., Vercel environment settings), ensuring they are not stored in source control.
+
+### 12.2 Key Rotation
+
+API keys can be rotated by updating the environment variables in the deployment configuration without requiring code changes.
+
+- Old keys are invalidated at the provider level
+- New keys take effect on the next deployment or server restart
+- No runtime dependency on fixed credentials
+
+### 12.3 Input Sanitization
+
+User input, particularly the `query` parameter used for search, is treated as untrusted input.
+
+- Query strings are trimmed before use
+- Empty or whitespace-only queries are handled as "headlines mode" (no search performed)
+- Inputs are passed to providers via server-side requests only (no direct client exposure)
+- URL encoding is handled automatically by `URLSearchParams`, preventing injection attacks on external APIs
+
+Additionally:
+- Category values are validated against a predefined whitelist (`CATEGORY_MAP`)
+- Invalid categories are rejected with a `400 Bad Request` response
+- Date ranges are validated: end date must be after start date, and range cannot exceed 15 days
+- Query length is limited to 200 characters to prevent resource exhaustion
+
+### 12.4 External API Safety
+
+All requests to external providers are made from the server layer only, preventing direct client access to third-party APIs and reducing exposure of API keys.
+
+- Provider API keys are never sent to the client
+- All API calls are performed server-to-server
+- Rate limiting is applied at the server layer before provider requests are made
+- Failed provider requests are handled gracefully without exposing internal error details to clients
+
+### 12.5 Error Handling & Information Disclosure
+
+Error responses are designed to avoid exposing sensitive system information.
+
+- Generic error messages are returned for server-side failures (500 errors)
+- Specific validation error messages are returned for client errors (400 errors)
+- Cursor decoding failures are caught and converted to validation errors
+- Provider-specific error details are logged server-side but not exposed to clients
+
+
+## 13. Testing Strategy
 
 DailyPlanet is designed to support testing at multiple levels, including unit testing, integration testing, and end-to-end testing. This layered approach ensures that individual components, system interactions, and user workflows can be validated independently.
 
-### 12.1 Unit Testing
+### 13.1 Unit Testing
 
 Unit tests focus on validating isolated business logic without requiring external dependencies.
 
@@ -565,7 +734,7 @@ Key areas for unit testing include:
 
 These tests ensure that core functionality behaves correctly under a variety of inputs and edge cases.
 
-### 12.2 Integration Testing
+### 13.2 Integration Testing
 
 Integration tests verify interactions between internal components and API routes.
 
@@ -579,7 +748,7 @@ Key integration test scenarios include:
 
 Integration testing ensures that requests are processed correctly throughout the application pipeline.
 
-### 12.3 External API Mocking
+### 13.3 External API Mocking
 
 Third-party news providers should be mocked during automated testing to avoid dependency on external services.
 
@@ -592,7 +761,7 @@ Mocking provides several benefits:
 
 Provider responses can be simulated using representative sample payloads obtained from Guardian, NewsData, and Currents APIs.
 
-### 12.4 End-to-End Testing
+### 13.4 End-to-End Testing
 
 End-to-end testing validates complete user workflows through the frontend interface.
 
@@ -607,7 +776,7 @@ Example scenarios include:
 
 These tests verify that the application behaves correctly from a user's perspective.
 
-### 12.5 Test Coverage Goals
+### 13.5 Test Coverage Goals
 
 The primary testing focus should be placed on the system's core business logic and integration points.
 
@@ -621,11 +790,11 @@ High-priority areas include:
 
 Testing these components provides confidence in the correctness and reliability of the platform.
 
-## 13. Scalability Considerations
+## 14. Scalability Considerations
 
 DailyPlanet was designed with scalability and maintainability as primary architectural goals. The system's modular structure allows individual components to evolve independently as requirements grow.
 
-### 13.1 Provider Scalability
+### 14.1 Provider Scalability
 
 The provider-based architecture allows additional news sources to be integrated without modifying the orchestration or aggregation layers.
 
@@ -637,7 +806,7 @@ To add a new provider, a developer must:
 
 This approach enables the platform to scale horizontally as additional content sources are introduced.
 
-### 13.2 Feature Scalability
+### 14.2 Feature Scalability
 
 The capability-based provider selection mechanism allows new filtering features to be introduced incrementally.
 
@@ -645,19 +814,19 @@ Providers can advertise support for new capabilities without requiring changes t
 
 This reduces coupling between providers and core application logic.
 
-### 13.3 Traffic Scalability
+### 14.3 Traffic Scalability
 
 The application is built on Next.js server-side infrastructure and incorporates caching and rate limiting to reduce load on both internal services and external providers.
 
 As traffic increases, additional caching strategies and distributed deployments can be introduced without significant architectural changes.
 
-### 13.4 Data Source Scalability
+### 14.4 Data Source Scalability
 
 Because all provider responses are normalized into a common article schema, the aggregation layer remains independent of provider-specific response formats.
 
 This ensures that increasing the number of providers does not significantly increase system complexity.
 
-### 13.5 Future Scaling Opportunities
+### 14.5 Future Scaling Opportunities
 
 Potential future enhancements include:
 
@@ -668,7 +837,7 @@ Potential future enhancements include:
 * Personalized news recommendations
 * Analytics dashboards
 
-## 14. Future Improvements
+## 15. Future Improvements
 
 Several enhancements can be made to improve functionality, scalability, and user experience.
 

@@ -7,3 +7,11 @@ pandoc technical.md \
           -V geometry:margin=0.75in \
           -V fontsize=11pt \
         -V subtitle="Ver 1.0"
+
+---
+title: "DailyPlanet Technical Design Document"
+subtitle: "Ver 1.1"
+date: "2026"
+toc: true
+chapters: true
+---

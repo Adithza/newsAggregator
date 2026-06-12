@@ -43,6 +43,10 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
 
   const mode = input.query?.trim() ? "search" : "headlines"
 
+  if (input.query && input.query.length > 200) {
+    throw new Error("Query must be under 200 characters")
+  }
+
   const categories = Array.isArray(input.category)
     ? input.category
     : input.category
@@ -120,16 +124,13 @@ export async function fetchNews(input: FetchNewsInput): Promise<NewsPageResult> 
 
   const byId = Object.fromEntries(results.map((result) => [result.id, result]))
 
-  const aggregated = aggregateArticles(
-    byId.guardian?.articles ?? [],
-    byId.newsdata?.articles ?? [],
-    byId.currents?.articles ?? []
-  )
+  const aggregated = aggregateArticles(...results.map((result) => result.articles))
 
   const articles = aggregated.map((article) => ({
     ...article,
     category: normalizeArticleCategories(article.category),
   }))
+
 
 
   const nextState: PaginationState = {

@@ -1,6 +1,7 @@
 import { currentsProvider } from "./providers/currents"
 import { guardianProvider } from "./providers/guardian"
 import { newsdataProvider } from "./providers/newsdata"
+import { mockProvider } from "./providers/mock"
 import type { NewsProvider } from "./providers/types"
 
 export const newsProviders: NewsProvider[] = [
@@ -10,6 +11,10 @@ export const newsProviders: NewsProvider[] = [
 ]
 
 export function assertProvidersConfigured(): void {
+  if (process.env.TEST_MODE === "true") {
+    return
+  }
+
   const missingKeys: string[] = []
   if (!process.env.GUARDIANAPI_KEY) missingKeys.push("GUARDIANAPI_KEY")
   if (!process.env.NEWSDATA_API_KEY) missingKeys.push("NEWSDATA_API_KEY")
@@ -24,6 +29,10 @@ export function getActiveProviders(opts: {
   startDate?: string
   endDate?: string
 }): NewsProvider[] {
+  if (process.env.TEST_MODE === "true") {
+    return [mockProvider]
+  }
+
   return newsProviders.filter((provider) => {
     if (!provider.isEnabled()) return false
     if (opts.country && !provider.supportsCountryFilter) return false

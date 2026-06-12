@@ -1,5 +1,5 @@
-export function aggregateArticles(guardianArticles: any[] = [], newsDataioArticles: any[] = [], currentNewsArticles: any[] = []) {
-    const allArticles = [...guardianArticles, ...newsDataioArticles, ...currentNewsArticles];
+export function aggregateArticles(...articleLists: any[][]) {
+    const allArticles = articleLists.flat();
 
     allArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 

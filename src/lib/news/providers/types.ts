@@ -1,6 +1,6 @@
 import type { FetchRequest, ProviderResult } from "../types"
 
-export type ProviderId = "guardian" | "newsdata" | "currents"
+export type ProviderId = "guardian" | "newsdata" | "currents" | "mock"
 
 export interface NewsProvider {
   id: ProviderId

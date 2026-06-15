@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
         const startDate = searchParams.get("startDate") || undefined;
         const endDate = searchParams.get("endDate") || undefined;
 
+        console.log("categories at api: ", category)
+
         const result = await searchNews(category, page, query, country, startDate, endDate);
         return NextResponse.json(result);
 

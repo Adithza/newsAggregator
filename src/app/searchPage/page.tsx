@@ -19,6 +19,8 @@ async function SearchPage({
   const data = await searchNews(categoryValues, undefined, queryValue, countryValue, startDateValue, endDateValue);
   const hasSearchParams = Boolean(queryValue?.trim() || categoryValues?.length || startDateValue || endDateValue)
 
+  console.log("Category values:", categoryValues)
+
   if (!hasSearchParams) {
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
@@ -38,7 +40,7 @@ return (
       </Suspense>
     </div>
 
-    <div className="shrink-0  pr-10  z-50">
+    <div className="shrink-0 w-1/4 pr-10  z-50">
       <SearchBar />
     </div>
   </div>

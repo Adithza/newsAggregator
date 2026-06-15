@@ -176,7 +176,7 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
 
   return (
     <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-4'>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
         {filteredArticles.map((article: any) => (
           <NewsCard key={article.url} article={article} />
         ))}

@@ -23,15 +23,21 @@ export const newsdataProvider: NewsProvider = {
       params.append("q", request.query)
     }
 
+    let categoryString: string | undefined = undefined
+
     if (request.category) {
       const requestedCategories = Array.isArray(request.category)
         ? request.category
         : [request.category]
 
-      requestedCategories.forEach((category) => {
-        const apiCategory = this.resolveCategory(category)
-        if (apiCategory) params.append("category", apiCategory)
-      })
+    categoryString = requestedCategories
+    .map((category) => this.resolveCategory(category))
+    .filter(Boolean)
+    .join(",");
+    }
+
+    if(categoryString){
+      params.append("category", categoryString);
     }
 
     if (request.cursor != null) {

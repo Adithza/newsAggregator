@@ -29,11 +29,27 @@ const subtractDays = (dateStr: string, days: number) => {
 };
 
   const toggleCategory = (value: string) => {
-    if (categories.includes(value)) {
-      setCategories(categories.filter((category: string) => category !== value))
-    } else {
-      setCategories([...categories, value])
+    const updatedCategories = categories.includes(value)
+    ? categories.filter((category) => category !== value)
+    : [...categories, value];
+
+    setCategories(updatedCategories);
+
+    const params = new URLSearchParams()
+    if (searchTerm.trim()) {
+      params.set('query', searchTerm.trim())
     }
+
+    updatedCategories.forEach((category) => {
+      params.append('category', category)
+    })
+
+    const country = searchParams.get("country")
+    if (country) params.set("country", country)
+    if (startDate) params.set("startDate", startDate)
+    if (endDate) params.set("endDate", endDate)
+
+    router.push(`/searchPage?${params.toString()}`);
   }
 
   const categoryOptions = [
@@ -57,7 +73,7 @@ const subtractDays = (dateStr: string, days: number) => {
 
   return (
     <div className='items-center sticky top-20 z-50 bg-black rounded-lg w-full max-w-lg'>
-      <form onSubmit={(e) => {
+      <form className="space-y-4" onSubmit={(e) => {
         e.preventDefault();
         const params = new URLSearchParams()
         if (searchTerm.trim()) {
@@ -86,22 +102,30 @@ const subtractDays = (dateStr: string, days: number) => {
           />
         </div>
 
-        {categoryOptions.map((option) => (
-          <div key={option.id} className='p-1'>
-            <input
-              type="checkbox"
-              id={option.id}
-              name="category"
-              value={option.value}
-              checked={categories.includes(option.value)}
-              onChange={() => toggleCategory(option.value)}
-              className='text-white'
-            />
-            <label htmlFor={option.id} className='ml-2 text-sm text-gray-400 font-semibold'>
-              {option.label}
-            </label>
-          </div>
-        ))}
+        <div className='flex flex-wrap gap-2'>
+        {categoryOptions.map((option) => {
+          const selected = categories.includes(option.value);
+
+          return (
+            <button
+            key={option.id}
+            type="button"
+            onClick={() => toggleCategory(option.value)}
+            className={`
+              px-3 py-2 rounded-full text-sm font-medium transition-all
+              ${selected
+              ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }
+            `}
+            >
+            {option.label}
+            </button>
+            );
+        })}
+        </div>
+
+        <p className='text-sm text-gray-400'>Press Enter to apply categories</p>
 
         <div>
         <input

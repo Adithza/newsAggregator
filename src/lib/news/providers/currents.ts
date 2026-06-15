@@ -10,8 +10,7 @@ export const currentsProvider: NewsProvider = {
   supportsDateFilter: true,
 
   isEnabled() {
-    //return Boolean(process.env.CURRENTNEWS_API_KEY)
-    return false
+    return Boolean(process.env.CURRENTNEWS_API_KEY)
   },
 
   resolveCategory(appCategory: string) {
@@ -25,15 +24,21 @@ export const currentsProvider: NewsProvider = {
       params.append("keywords", request.query)
     }
 
+    let categoryString: string | undefined = undefined
+
     if (request.category) {
       const requestedCategories = Array.isArray(request.category)
         ? request.category
         : [request.category]
 
-      requestedCategories.forEach((category) => {
-        const apiCategory = this.resolveCategory(category)
-        if (apiCategory) params.append("category", apiCategory)
-      })
+    categoryString = requestedCategories
+    .map((category) => this.resolveCategory(category))
+    .filter(Boolean)
+    .join(",");
+    }
+
+    if(categoryString){
+      params.append("category", categoryString);
     }
 
     console.log(request.mode)
@@ -63,6 +68,8 @@ export const currentsProvider: NewsProvider = {
         ? "https://api.currentsapi.services/v2/search"
         : "https://api.currentsapi.services/v2/latest-news"
 
+    console.log(params.toString())
+
 
     const res = await fetch(
       `${endpoint}?apiKey=${process.env.CURRENTNEWS_API_KEY}&${params.toString()}`,
@@ -76,6 +83,8 @@ export const currentsProvider: NewsProvider = {
     }
 
     const data = await res.json()
+
+    console.log(data.category)
 
     return {
       articles: data.news.map((article: unknown) =>

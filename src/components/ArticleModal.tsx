@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -8,8 +10,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Article } from "@/lib/news/types"
+import DOMPurify from "isomorphic-dompurify"
 
 export function ArticleModal({ article }: {article:Article}) {
+
+  const cleanHTML =  DOMPurify.sanitize(article.content ?? "")
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -17,8 +22,8 @@ export function ArticleModal({ article }: {article:Article}) {
       </DialogTrigger>
       <DialogContent showCloseButton={true}>
         {article.source === "Guardian" ? <><DialogHeader className="bg-gray-800 p-4">
-          <DialogTitle className="px-4 text-2xl">{article.title}</DialogTitle>
-          <DialogDescription className="px-4 flex gap-4">
+          <DialogTitle className="px-4 text-xl">{article.title}</DialogTitle>
+          <DialogDescription className="px-4 flex gap-4 text-md">
             
             <span>{article.byline}</span>
             <span>{new Date(article.publishedAt).toLocaleString("en-IN")}</span>
@@ -29,7 +34,7 @@ export function ArticleModal({ article }: {article:Article}) {
         <div className="mx-4 no-scrollbar  overflow-y-auto p-4">
           
             <img src={article.thumbnail} className="mx-auto block mt-5 mb-10 w-full"></img>
-            <div className="text-xl [&_p]:mb-6" dangerouslySetInnerHTML={{ __html:article.content!}} />
+            <div className="text-lg [&_p]:mb-6" dangerouslySetInnerHTML={{ __html:cleanHTML!}} />
         </div>
         </>: <iframe src={article.url} className="w-full h-full"></iframe>
         }

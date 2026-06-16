@@ -35,9 +35,13 @@ const subtractDays = (dateStr: string, days: number) => {
 
     setCategories(updatedCategories);
 
+    
+
     const params = new URLSearchParams()
     if (searchTerm.trim()) {
       params.set('query', searchTerm.trim())
+    }else{
+      params.set('query', searchParams.get('query') ?? '')
     }
 
     updatedCategories.forEach((category) => {
@@ -89,6 +93,8 @@ const subtractDays = (dateStr: string, days: number) => {
         if (startDate) params.set("startDate", startDate)
         if (endDate) params.set("endDate", endDate)
 
+        setSearchTerm("")
+
         router.push(`/searchPage?${params.toString()}`);
       }}>
         <div>
@@ -97,7 +103,7 @@ const subtractDays = (dateStr: string, days: number) => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search for news..."
+            placeholder={searchParams.get("query") ? searchParams.get("query")! : "Search articles..."}
             className=" pl-12 pr-12 py-2 md:py-2.5 w-full bg-gray-900   rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-gray-800 transition-all"
           />
         </div>

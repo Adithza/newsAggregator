@@ -45,7 +45,7 @@ export function normalizeGuardianArticle(article: any) {
         category: [article.sectionName],
         source : "Guardian",
         publishedAt: article.webPublicationDate,
-        content: article.fields?.bodyText,
+        content: article.fields?.body,
         byline: (article.fields?.byline ? article.fields.byline : undefined),
         thumbnail: resolveThumbnail(article.fields?.thumbnail),
         country: "United Kingdom",

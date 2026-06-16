@@ -1,6 +1,7 @@
 "use client"
 import Image from 'next/image'
 import React from 'react'
+import { ArticleModal } from './ArticleModal'
 
 function NewsCard({article}: {article: any}) {
 
@@ -17,9 +18,7 @@ function NewsCard({article}: {article: any}) {
               {/*<p className='text-xs lg:text-sm text-gray-300 pl-2'>{article.country? article.country : ""}</p>*/}
             </div>
             <p className='text-xs lg:text-sm line-clamp-2'>{article.content}</p>
-            <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
-              Read more
-            </a>
+            <ArticleModal article={article} />
         </div>
     </div>
   )

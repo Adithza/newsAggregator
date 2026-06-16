@@ -18,11 +18,11 @@ export function ArticleModal({ article }: {article:Article}) {
       <DialogContent showCloseButton={true}>
         {article.source === "Guardian" ? <><DialogHeader className="bg-gray-800 p-4">
           <DialogTitle className="px-4 text-2xl">{article.title}</DialogTitle>
-          <DialogDescription className="px-4 ">
-            <div className="flex gap-4 pb-2 text-lg">
+          <DialogDescription className="px-4 flex gap-4">
+            
             <span>{article.byline}</span>
             <span>{new Date(article.publishedAt).toLocaleString("en-IN")}</span>
-            </div>
+       
             
           </DialogDescription>
         </DialogHeader>

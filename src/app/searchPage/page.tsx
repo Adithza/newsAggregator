@@ -40,8 +40,10 @@ return (
       </Suspense>
     </div>
 
-    <div className="hidden lg:flex shrink-0 w-1/4 pr-10  z-50">
+    <div className="hidden lg:block shrink-0 w-1/4 pr-10">
+    <div className="sticky top-20">
       <SearchBar />
+    </div>
     </div>
   </div>
 );

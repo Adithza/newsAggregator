@@ -46,7 +46,7 @@ export function ArticleModal({ article }: {article:Article}) {
             
           </DialogDescription>
         </DialogHeader>
-        <div className="mx-4 no-scrollbar  overflow-y-auto p-4">
+        <div className="mx-4 no-scrollbar overscroll-contain overflow-y-auto p-4">
           
             <img src={article.thumbnail} className="mx-auto block mt-5 mb-10 w-full"></img>
             <div className="text-lg [&_p]:mb-6" dangerouslySetInnerHTML={{ __html:cleanHTML!}} />

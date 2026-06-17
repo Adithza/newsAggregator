@@ -13,7 +13,7 @@ function CatTabs() {
   const categories = Object.keys(CATEGORY_MAP)
 
   return (
-    <div className='flex md:gap-3 overflow-x-scroll scrollbar-hide scrollbar-hide py-6 sm:px-12 justify-start md:justify-center sticky top-16 z-40 bg-black w-full'>
+    <div className='flex md:gap-3 overflow-x-scroll scrollbar-hide scrollbar-hide py-6 sm:px-12 justify-start md:justify-center fixed top-16 z-40 bg-black w-full'>
       {categories.map((category) => {
         const isActive = activeCategory === category;
 

@@ -76,7 +76,7 @@ const subtractDays = (dateStr: string, days: number) => {
   const minDate = threeMonthsAgo.toISOString().split("T")[0];
 
   return (
-    <div className='items-center sticky top-20 z-50 bg-black rounded-lg w-full max-w-lg'>
+    <div className='items-center z-50 bg-black rounded-lg w-full max-w-lg'>
       <form className="space-y-4" onSubmit={(e) => {
         e.preventDefault();
         const params = new URLSearchParams()

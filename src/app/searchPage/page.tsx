@@ -31,7 +31,7 @@ async function SearchPage({
 
 return (
   <div className="flex flex-1 bg-zinc-50 dark:bg-black">
-    <div className="flex-1">
+    <div className="flex-1 pt-5">
       <Suspense
         key={`${queryValue ?? ""}-${countryValue ?? "all"}-${categoryValues?.join(",") ?? "all"}`}
         fallback={<Loading />}

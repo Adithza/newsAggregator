@@ -51,7 +51,7 @@ export function ArticleModal({ article }: {article:Article}) {
             <img src={article.thumbnail} className="mx-auto block mt-5 mb-10 w-full"></img>
             <div className="text-lg [&_p]:mb-6" dangerouslySetInnerHTML={{ __html:cleanHTML!}} />
         </div>
-        </>: <iframe src={article.url} className="w-full h-full"></iframe>
+        </>: <iframe src={article.url} className="w-full h-full rounded-xl"></iframe>
         }
       </DialogContent>
     </Dialog>

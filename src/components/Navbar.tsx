@@ -13,8 +13,7 @@ function Navbar() {
   return (
     <div className="bg-gray-950 shadow-md fixed top-0 left-0 right-0 h-16 py-4 px-4 sm:px-8 flex items-center z-50 w-full gap-4">
       <Link href="/" className="text-lg md:text-2xl font-bold bg-linear-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent whitespace-nowrap">
-        <span className='hidden md:inline'>DailyPlanet</span>
-        <span className='md:hidden'>DP</span>
+        <p>DailyPlanet</p>
       </Link>
       <Suspense
         fallback={
@@ -25,10 +24,11 @@ function Navbar() {
         }
       >
          <CountryFilter />
-        <div className='ml-auto'><LocalSearch /></div>
-        <Sheet>
+        <div className='ml-auto hidden lg:flex'><LocalSearch /></div>
+        <div className='ml-auto'>
+          <Sheet>
           <SheetTrigger asChild>
-            <button className="md:hidden">
+            <button className="lg:hidden">
             <MenuIcon size={24} />
             </button>
         </SheetTrigger>
@@ -37,6 +37,7 @@ function Navbar() {
           <div className='p-4'><SearchBar /></div>
         </SheetContent>
         </Sheet>
+        </div>
       </Suspense>
     </div>
   )

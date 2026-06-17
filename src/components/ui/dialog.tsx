@@ -70,8 +70,8 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
-              variant="ghost"
-              className="absolute top-2 right-2"
+              variant='default'
+              className="absolute top-4 right-4 bg-blue-600 text-amber-50"
               size="icon-sm"
             >
               <XIcon
@@ -130,7 +130,7 @@ function DialogTitle({
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading pb-8 text-4xl leading-none font-medium",
+        "font-heading pb-8 pr-6 text-4xl leading-none font-medium",
         className
       )}
       {...props}

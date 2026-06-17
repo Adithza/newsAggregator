@@ -23,7 +23,7 @@ async function SearchPage({
 
   if (!hasSearchParams) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+    <div className="flex flex-col flex-1 items-center justify-center px-4 bg-zinc-50 dark:bg-black">
       <SearchBar />
     </div>
   );
@@ -40,7 +40,7 @@ return (
       </Suspense>
     </div>
 
-    <div className="shrink-0 w-1/4 pr-10  z-50">
+    <div className="hidden lg:flex shrink-0 w-1/4 pr-10  z-50">
       <SearchBar />
     </div>
   </div>

@@ -14,7 +14,22 @@ import DOMPurify from "isomorphic-dompurify"
 
 export function ArticleModal({ article }: {article:Article}) {
 
+   {/*if(article.source !== "Guardian"){
+    return(
+        <Button asChild variant='outline'>
+            <a href={article.url} target='_blank' rel='noopener noreferrer'>
+                Read more
+            </a>
+        </Button>
+    )
+   }*/} 
+
+
+
   const cleanHTML =  DOMPurify.sanitize(article.content ?? "")
+
+
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -22,8 +37,8 @@ export function ArticleModal({ article }: {article:Article}) {
       </DialogTrigger>
       <DialogContent showCloseButton={true}>
         {article.source === "Guardian" ? <><DialogHeader className="bg-gray-800 p-4">
-          <DialogTitle className="px-4 text-xl">{article.title}</DialogTitle>
-          <DialogDescription className="px-4 flex gap-4 text-md">
+          <DialogTitle className=" text-xl">{article.title}</DialogTitle>
+          <DialogDescription className="flex gap-4 text-md">
             
             <span>{article.byline}</span>
             <span>{new Date(article.publishedAt).toLocaleString("en-IN")}</span>

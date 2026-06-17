@@ -1,11 +1,11 @@
-"use client"
+"use client";
+
 import React, { useEffect, useRef, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import NewsCard from './NewsCard'
 import { useSearch } from './searchContext'
 import { useRouter } from 'next/navigation'
-
-function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) {
+function NewsFeed({ articles: initialArticles, nextPage: initialNextPage }: any) {
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -49,7 +49,7 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
       if (categories.length > 0) {
         categories.forEach((category) => params.append('category', category))
       }
-      const useSearchQuery = query || searchTerm 
+      const useSearchQuery = query || searchTerm
       if (useSearchQuery) {
         params.append('query', query || searchTerm)
       }
@@ -134,17 +134,17 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
     const params = new URLSearchParams({ query: searchTerm.trim() })
     if (country) params.set("country", country)
 
-    if(pathname === '/') {
+    if (pathname === '/') {
       params.set("category", searchParams.get("category") ?? "")
       router.push(`/searchPage?${params.toString()}`)
       setSearchTerm("")
-    }else{
+    } else {
       categories.forEach((category) => params.append('category', category))
       router.push(`/searchPage?${params.toString()}`)
       setSearchTerm("")
     }
 
-    
+
   }
 
   useEffect(() => {
@@ -169,9 +169,9 @@ function NewsFeed({ articles: initialArticles, nextPage: initialNextPage}: any) 
 
   const filteredArticles = isLocalSearchActive
     ? articles.filter((article: any) =>
-        article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        article.content?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     : articles
 
   return (

@@ -3,6 +3,8 @@ import { getNews } from "@/lib/getNews";
 import CatTabs from "@/components/CatTabs";
 import NewsFeed from "@/components/NewsFeed";
 import Loading from "./loading";
+import { DataScrollLockFix } from "@/components/DataScrollLockFix";
+
 
 export default async function Home({
   searchParams,
@@ -13,14 +15,19 @@ export default async function Home({
 
   const data = await getNews(category, undefined, country);
 
+  // usePreventScrollLock();
+
   return (
-    <div className="flex flex-col flex-1 items-center bg-zinc-50 dark:bg-black">
-      <Suspense fallback={null}>
-        <CatTabs />
-      </Suspense>
-      <Suspense key={`${category ?? "all"}-${country ?? "all"}`} fallback={<Loading />}>
-        <NewsFeed articles={data.articles} nextPage={data.nextPage} />
-      </Suspense>
-    </div>
+    <>
+      <DataScrollLockFix />
+      <div className="flex flex-col flex-1 items-center bg-zinc-50 dark:bg-black">
+        <Suspense fallback={null}>
+          <CatTabs />
+        </Suspense>
+        <Suspense key={`${category ?? "all"}-${country ?? "all"}`} fallback={<Loading />}>
+          <NewsFeed articles={data.articles} nextPage={data.nextPage} />
+        </Suspense>
+      </div>
+    </>
   );
 }

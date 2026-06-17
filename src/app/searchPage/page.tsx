@@ -3,6 +3,7 @@ import NewsFeed from '@/components/NewsFeed';
 import Loading from "./loading";
 import { searchNews } from "@/lib/searchNews";
 import SearchBar from "@/components/GlobalSearchBar";
+import { DataScrollLockFix } from "@/components/DataScrollLockFix";
 
 
 async function SearchPage({
@@ -24,6 +25,7 @@ async function SearchPage({
   if (!hasSearchParams) {
   return (
     <div className="flex flex-col flex-1 items-center justify-center px-4 bg-zinc-50 dark:bg-black">
+      <DataScrollLockFix />
       <SearchBar />
     </div>
   );
@@ -31,6 +33,7 @@ async function SearchPage({
 
 return (
   <div className="flex flex-1 bg-zinc-50 dark:bg-black">
+    <DataScrollLockFix />
     <div className="flex-1 pt-5">
       <Suspense
         key={`${queryValue ?? ""}-${countryValue ?? "all"}-${categoryValues?.join(",") ?? "all"}`}

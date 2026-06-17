@@ -97,8 +97,8 @@ const subtractDays = (dateStr: string, days: number) => {
 
         router.push(`/searchPage?${params.toString()}`);
       }}>
-        <div>
-          <Search className='absolute ml-3 mt-3 text-gray-400' size={20} />
+        <div className='items-center'>
+          <Search className='absolute ml-3 mt-2 lg:mt-3 text-gray-400' size={20} />
           <input
             type="text"
             value={searchTerm}

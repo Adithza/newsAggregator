@@ -29,8 +29,18 @@ export function ArticleModal({ article }: { article: Article }) {
 
   const [canEmbed, setCanEmbed] = useState<boolean | null>(null);
 
+  const [open, setOpen] = useState(false);
+
+  const [isLoading, setLoading] = useState(false)
+
   useEffect(() => {
+
+    if (!open) return
+    if (canEmbed !== null) return
+
+
     async function run() {
+      setLoading(true)
       const { xfo, csp } = await checkIframe(article.url);
 
       const frameAncestorsBlocked =
@@ -39,20 +49,23 @@ export function ArticleModal({ article }: { article: Article }) {
 
       const blocked =
         xfo?.toLowerCase() === "deny" ||
-        xfo?.toLowerCase() === "sameorigin";
+        xfo?.toLowerCase() === "sameorigin" ||
+        frameAncestorsBlocked;
 
       setCanEmbed(!blocked);
+      setLoading(false)
     }
 
     run();
-  }, [article.url]);
+
+  }, [open, canEmbed, article.url]);
 
   const cleanHTML = DOMPurify.sanitize(article.content ?? "")
 
 
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant='outline'>Read More</Button>
       </DialogTrigger>
@@ -72,7 +85,24 @@ export function ArticleModal({ article }: { article: Article }) {
             <img src={article.thumbnail} className="mx-auto block mt-5 mb-10 w-full"></img>
             <div className="text-lg [&_p]:mb-6" dangerouslySetInnerHTML={{ __html: cleanHTML! }} />
           </div>
-        </> : canEmbed ? <iframe src={article.url} className="w-full h-full rounded-xl"></iframe> : <a href={article.url} className="text-xl p-5 pt-10 text-blue-500 underline">This site does not allow cross site embedding, click here to go to external site</a>
+        </> : isLoading ? <div
+          className="bg-gray-900 rounded-lg shadow-md overflow-hidden animate-pulse"
+        >
+          <div className="h-48 bg-gray-800" />
+          <div className="p-5 space-y-3">
+            <div className="h-6 bg-gray-800 rounded w-full" />
+            <div className="h-6 bg-gray-800 rounded w-2/3" />
+            <div className="flex gap-4 pt-1">
+              <div className="h-4 bg-gray-800 rounded w-24" />
+              <div className="h-4 bg-gray-800 rounded w-16" />
+            </div>
+            <div className="space-y-2 pt-2">
+              <div className="h-3 bg-gray-800 rounded w-full" />
+              <div className="h-3 bg-gray-800 rounded w-5/6" />
+            </div>
+            <div className="h-4 bg-gray-800 rounded w-16 pt-1" />
+          </div>
+        </div> : canEmbed ? <iframe src={article.url} className="w-full h-full rounded-xl"></iframe> : <a href={article.url} className="text-xl p-5 pt-10 text-blue-500 underline" target='_blank' rel='noopener noreferrer'>This site does not allow cross site embedding, click here to go to external site</a>
         }
       </DialogContent>
     </Dialog>

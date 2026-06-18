@@ -133,6 +133,8 @@ const subtractDays = (dateStr: string, days: number) => {
 
         <p className='text-sm text-gray-400'>Press Enter to apply categories</p>
 
+        <hr className='border-amber-50 border'></hr>
+
         <div>
         <input
           type="date"

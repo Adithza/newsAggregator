@@ -43,14 +43,24 @@ export function ArticleModal({ article }: { article: Article }) {
       setLoading(true)
       const { xfo, csp } = await checkIframe(article.url);
 
+      const frameAncestors = csp?.match(
+        /frame-ancestors\s+([^;]+)/i
+      )?.[1];
+
       const frameAncestorsBlocked =
-        csp?.includes("frame-ancestors 'self'") ||
-        csp?.includes("frame-ancestors 'none'");
+        frameAncestors !== undefined;
 
       const blocked =
         xfo?.toLowerCase() === "deny" ||
         xfo?.toLowerCase() === "sameorigin" ||
         frameAncestorsBlocked;
+
+      console.log({
+        xfo,
+        csp,
+        blocked,
+        canEmbedWillBe: !blocked,
+      });
 
       setCanEmbed(!blocked);
       setLoading(false)
